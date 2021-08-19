@@ -1,0 +1,11 @@
+version: "3"
+services:
+    express-react-ts-template:
+        image: elyspio/file-serve
+        ports:
+            - "4011:4000"
+        volumes:
+            - "./config/front/conf.js:/front/conf.js"
+        container_name: "file-serve"
+        environment:
+            AUTHENTICATION_SERVER_URI: "https://elyspio.fr/authentication"
