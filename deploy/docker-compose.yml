@@ -1,11 +1,24 @@
 version: "3"
 services:
-    express-react-ts-template:
+    file-serve:
+        container_name: "file-serve"
         image: elyspio/file-serve
-        ports:
-            - "4011:4000"
         volumes:
             - "./config/front/conf.js:/front/conf.js"
-        container_name: "file-serve"
         environment:
             AUTHENTICATION_SERVER_URI: "https://elyspio.fr/authentication"
+        networks:
+            - frontend
+        labels:
+            - "traefik.enable=true"
+            - "traefik.docker.network=frontend"
+            - "traefik.http.middlewares.file-serve-prefix.stripprefix.prefixes=/file-serve"
+            - "traefik.http.routers.file-serve.middlewares=file-serve-prefix@docker"
+            - "traefik.http.routers.file-serve.rule=PathPrefix(`/file-serve`)"
+            - "traefik.http.services.file-serve.loadbalancer.server.port=4000"
+            - "traefik.http.routers.file-serve.entrypoints=http"
+
+
+networks:
+    frontend:
+        external: true
