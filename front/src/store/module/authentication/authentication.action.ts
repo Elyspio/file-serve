@@ -1,16 +1,17 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import store, {StoreState} from "../../index";
-import {UserSettingsModelThemeEnum} from "../../../core/apis/authentication";
+import {UserSettingsModelThemeEnum} from "../../../core/apis/authentication/generated";
 import {setTheme} from "../theme/theme.action";
-import {AuthenticationEvents, AuthenticationService} from "../../../core/services/authentication";
+import {AuthenticationEvents, AuthenticationService} from "../../../core/services/authentication.service";
 import {toast} from "react-toastify";
-import {DependencyInjection} from "../../../core/services/di";
-import {LocalStorageService} from "../../../core/services/localStorage";
+import {container} from "../../../core/di/di.container";
+import {DiKeysService} from "../../../core/di/di.keys.service";
+import {LocalStorageService} from "../../../core/services/localStorage.service";
 
-const authentication = DependencyInjection.container.get<AuthenticationService>(DependencyInjection.keys.authentication)
+const authentication = container.get<AuthenticationService>(DiKeysService.authentication)
 const localStorages = {
-	validation :  DependencyInjection.container.get<LocalStorageService>(DependencyInjection.keys.localStorage.validation),
-	settings: DependencyInjection.container.get<LocalStorageService>(DependencyInjection.keys.localStorage.settings)
+	validation: container.get<LocalStorageService>(DiKeysService.localStorage.validation),
+	settings: container.get<LocalStorageService>(DiKeysService.localStorage.settings)
 }
 
 

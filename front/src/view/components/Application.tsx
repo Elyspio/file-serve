@@ -3,7 +3,7 @@ import "./Application.scss"
 import Brightness5Icon from '@material-ui/icons/Brightness5';
 import Brightness3Icon from '@material-ui/icons/Brightness3';
 import Login from '@material-ui/icons/AccountCircle';
-import Example from "./test/Test";
+import {Files} from "./files/Files";
 import {useAppDispatch, useAppSelector} from "../../store";
 import {toggleTheme} from "../../store/module/theme/theme.action";
 import {createDrawerAction, withDrawer} from "./utils/drawer/Drawer.hoc";
@@ -46,9 +46,9 @@ function Application() {
 
 
 	const drawer = withDrawer({
-		component: <Example/>,
+		component: <Files/>,
 		actions,
-		title: "Example"
+		title: "Files"
 	})
 
 

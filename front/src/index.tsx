@@ -10,8 +10,8 @@ import {themes} from "./config/theme";
 import {Config} from "./config/window";
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Provider as DiProvider } from 'inversify-react';
-import {DependencyInjection} from "./core/services/di";
+import {Provider as DiProvider} from 'inversify-react';
+import {container} from "./core/di/di.container";
 
 
 declare global {
@@ -35,7 +35,7 @@ function Wrapper() {
 function App() {
 
 	return (
-		<DiProvider container={DependencyInjection.container}>
+		<DiProvider container={container}>
 			<Provider store={store}>
 				<Wrapper/>
 			</Provider>

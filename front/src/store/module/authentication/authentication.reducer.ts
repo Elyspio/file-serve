@@ -1,6 +1,6 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {getUserInfos, logout} from "./authentication.action";
-import {CredentialsModel, UserSettingsModel} from "../../../core/apis/authentication";
+import {CredentialsModel, UserSettingsModel} from "../../../core/apis/authentication/generated";
 
 export interface AuthenticationState {
 	logged: boolean,

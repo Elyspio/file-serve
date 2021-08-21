@@ -1,14 +1,15 @@
 import {createAction as _createAction} from "@reduxjs/toolkit";
-import {AuthenticationEvents, AuthenticationService} from "../../../core/services/authentication";
+import {AuthenticationEvents, AuthenticationService} from "../../../core/services/authentication.service";
 import store from "../../index";
-import {DependencyInjection} from "../../../core/services/di";
+import {container} from "../../../core/di/di.container";
+import {DiKeysService} from "../../../core/di/di.keys.service";
 
 const createAction = <T>(name: string) => _createAction<T>(`theme/${name}`);
 
 export const setTheme = createAction<"dark" | "light">("set");
 export const toggleTheme = createAction<void>("toggle");
 
-const authentication = DependencyInjection.container.get<AuthenticationService>(DependencyInjection.keys.authentication)
+const authentication = container.get<AuthenticationService>(DiKeysService.authentication)
 
 
 AuthenticationEvents.on("login", async (username) => {
