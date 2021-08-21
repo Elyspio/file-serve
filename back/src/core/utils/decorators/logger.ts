@@ -9,13 +9,21 @@ declare global {
 }
 
 
+export type LogOption =
+	{
+		arguments: number[] | boolean,
+		level: "info" | "error" | "fatal" | "warning" | "debug"
+	}
+
+
 /**
  *
  * @param logger
+ * @param level
  * @param logArguments false means that no argument is logged, [] means that all arguments are logged, [0] means that only the first argument is logged
  * @constructor
  */
-export const Log = (logger: Logger, logArguments: number[] | boolean = true) => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+export const Log = (logger: Logger, {level, arguments: logArguments}: LogOption = {level: "info", arguments: []}) => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 	let originalMethod = descriptor.value
 
 
@@ -27,19 +35,19 @@ export const Log = (logger: Logger, logArguments: number[] | boolean = true) => 
 		if (logArguments !== false) {
 			argsStr = argsName.reduce((previousValue, currentValue, currentIndex) => {
 				if (logArguments !== true) {
-					if (!logArguments.includes(currentIndex)) return previousValue;
+					if (!logArguments?.includes(currentIndex)) return previousValue;
 				}
 				return `${previousValue} ${currentValue}=${JSON.stringify(args[currentIndex])}`
 			}, "-");
 		}
 
-		logger.info(`${propertyKey} - Entering ${argsStr}`);
+		logger[level](`${propertyKey} - Entering ${argsStr}`);
 
 		const now = Date.now();
 		const result = originalMethod.apply(this, args);
 
 		const exitLog = () => {
-			logger.info(`${propertyKey} - Exited after ${Date.now() - now}ms`);
+			logger[level](`${propertyKey} - Exited after ${Date.now() - now}ms`);
 		};
 
 		if (typeof result === "object" && typeof result.then === "function") {

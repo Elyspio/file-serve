@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import {promises} from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -6,19 +7,15 @@ import {getLogger} from "../utils/logger";
 import {Service} from "@tsed/common";
 import * as crypto from "crypto";
 
-const {writeFile, readFile, rm, mkdir} = promises
+const {writeFile, readFile, rm, mkdir, access} = promises
 
-let filesPath = process.env.FILES_PATH ?? path.resolve(__dirname, "..", "..", "files");
-export const files = {
-	adminFiles: path.join(filesPath, "secured"),
-	freeFiles: path.join(filesPath, "free")
-}
+
 @Service()
 export class StorageService {
 
 	private static logger = getLogger.service(StorageService)
 
-	@Log(StorageService.logger, [0])
+	@Log(StorageService.logger, {level: "debug", arguments: [0]})
 	async store(name: string, data: string | object) {
 
 		if (name[0] === "~") {
@@ -30,12 +27,12 @@ export class StorageService {
 		return writeFile(path.resolve(name), data);
 	}
 
-	@Log(StorageService.logger)
+	@Log(StorageService.logger, {level: "debug", arguments: []})
 	async read(name: string) {
 		return (await readFile(name)).toString()
 	}
 
-	@Log(StorageService.logger, false)
+	@Log(StorageService.logger, {level: "debug", arguments: []})
 	async createTempFile(content: string) {
 		const filename = crypto.randomBytes(16).toString("hex");
 		const tmpdir = path.join(os.tmpdir(), "backup-maker")
@@ -47,5 +44,13 @@ export class StorageService {
 			clean: () => rm(filepath)
 		}
 	}
+
+	@Log(StorageService.logger, {level: "debug", arguments: []})
+	async exist(name: string) {
+		return access(name, fs.constants.F_OK)
+			.then(() => true)
+			.catch(() => false)
+	}
+
 
 }

@@ -1,6 +1,6 @@
 import {Log} from "../utils/decorators/logger";
 import {getLogger} from "../utils/logger";
-import {AuthenticationApiClient} from "../apis/authentication/"
+import {AuthenticationApiClient, UsersApiClient} from "../apis/authentication"
 import {Inject} from "@tsed/di";
 import {Service} from "@tsed/common";
 
@@ -12,10 +12,18 @@ export class AuthenticationService {
 	@Inject()
 	private authenticationApi: AuthenticationApiClient
 
-	@Log(AuthenticationService.log)
+	@Inject()
+	private usersApi: UsersApiClient
+
+	@Log(AuthenticationService.log, {level: "debug", arguments: []})
 	public async isAuthenticated(token: string) {
-		const {data} = await this.authenticationApi.client.validToken(token);
-		AuthenticationService.log.debug(`isAuthenticated token=${token} result=${data}`)
-		return data;
+		return this.authenticationApi.client.validToken(token).then(x => x.data);
 	}
+
+	@Log(AuthenticationService.log, {level: "debug", arguments: []})
+	public async getUsername(token: string) {
+		return this.usersApi.client.getUserInfo("username", token).then(x => x.data);
+	}
+
+
 }

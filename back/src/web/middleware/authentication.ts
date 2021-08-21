@@ -1,5 +1,5 @@
 import {IMiddleware, Middleware, QueryParams, Req} from "@tsed/common";
-import {ArrayOf, Integer, Property, Returns} from "@tsed/schema";
+import {ArrayOf, In, Integer, JsonParameterTypes, Property, Returns} from "@tsed/schema";
 import {Unauthorized} from "@tsed/exceptions"
 import {Request} from "express"
 import {authorization_cookie_token} from "../../config/authentication";
@@ -27,16 +27,17 @@ export class RequireLogin implements IMiddleware {
 	@Inject()
 	private authenticationService: AuthenticationService
 
-	@Returns(401, UnauthorizedModel)
-	public async use(@Req() {headers, cookies}: Request, @QueryParams("token") token?: string) {
+	public async use(@Req() req: Request, @QueryParams("token") token?: string) {
+
+		const exception = new Unauthorized("You must be logged to access to this resource see https://elyspio.fr/authentication/");
 
 		// Sanitize token param
 		if (token === "") token = undefined;
 
 		try {
 
-			const cookieAuth = cookies[authorization_cookie_token]
-			const headerToken = headers[authorization_cookie_token];
+			const cookieAuth = req.cookies[authorization_cookie_token]
+			const headerToken = req.headers[authorization_cookie_token];
 
 			RequireLogin.log.info("RequireLogin", {
 				cookieAuth,
@@ -49,11 +50,26 @@ export class RequireLogin implements IMiddleware {
 
 
 			if (await this.authenticationService.isAuthenticated(token)) {
+				req.auth = {
+					username: await this.authenticationService.getUsername(token)
+				}
 				return true
-			} else throw ""
+			} else throw exception;
 		} catch (e) {
-			throw new Unauthorized("You must be logged to access to this resource see https://elyspio.fr/authentication");
+			throw exception;
 		}
 	}
 
 }
+
+declare global {
+	namespace Express {
+		interface Request {
+			auth?: {
+				username: string
+			}
+		}
+	}
+}
+
+
