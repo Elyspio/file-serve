@@ -1,11 +1,11 @@
 import {IMiddleware, Middleware, QueryParams, Req} from "@tsed/common";
-import {ArrayOf, In, Integer, JsonParameterTypes, Property, Returns} from "@tsed/schema";
+import {ArrayOf, Integer, Property} from "@tsed/schema";
 import {Unauthorized} from "@tsed/exceptions"
 import {Request} from "express"
 import {authorization_cookie_token} from "../../config/authentication";
 import {getLogger} from "../../core/utils/logger";
 import {Inject} from "@tsed/di";
-import {AuthenticationService} from "../../core/services/authentication";
+import {AuthenticationService} from "../../core/services/authentication.service";
 
 export class UnauthorizedModel {
 	@ArrayOf(String)

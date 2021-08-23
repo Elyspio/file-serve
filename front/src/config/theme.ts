@@ -3,7 +3,7 @@ import * as colors from "@material-ui/core/colors";
 import {UserSettingsModel} from "../core/apis/authentication/generated";
 import {ThemeService} from "../core/services/theme.service";
 import {LocalStorageService} from "../core/services/localStorage.service";
-import {container} from "../core/di/di.container";
+import {container} from "../core/di";
 import {DiKeysService} from "../core/di/di.keys.service";
 
 const darkTheme = createTheme(({

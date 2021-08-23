@@ -10,7 +10,7 @@ const instance = axios.create({
 @injectable()
 export class BackendApi {
 
-	public  readonly clients = {
+	public readonly clients = {
 		files: new FilesApi(undefined, window.config.endpoints.core, instance),
 	}
 

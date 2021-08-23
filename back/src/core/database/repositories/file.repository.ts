@@ -19,7 +19,7 @@ export class FileRepository implements AfterRoutesInit {
 		this.repo = connection.getRepository(FileEntity);
 	}
 
-	@Log(FileRepository.log)
+	@Log(FileRepository.log, {level: "debug", arguments: false})
 	async add(file: Omit<FileEntity, "id" | "user">, username: string): Promise<FileEntity> {
 		return await this.repo.save({
 			name: file.name,
@@ -31,7 +31,7 @@ export class FileRepository implements AfterRoutesInit {
 
 	}
 
-	@Log(FileRepository.log)
+	@Log(FileRepository.log, {level: "debug", arguments: []})
 	async find(username: string): Promise<FileEntity[]> {
 		return await this.repo.find({
 			where: {
@@ -43,18 +43,17 @@ export class FileRepository implements AfterRoutesInit {
 	}
 
 
-	@Log(FileRepository.log)
-	async findById(username: string, filename: string): Promise<FileEntity | undefined> {
+	@Log(FileRepository.log, {level: "debug", arguments: []})
+	async findById(id: number): Promise<FileEntity | undefined> {
 		return await this.repo.findOne({
 			where: {
-				name: filename,
-				user: {
-					username
-				}
-			}
+				id
+			},
+			relations: ["user"]
 		});
 	}
 
+	@Log(FileRepository.log, {level: "debug", arguments: []})
 	async list(username: string) {
 		return (await this.repo.find({
 			select: ["name"],
@@ -63,6 +62,19 @@ export class FileRepository implements AfterRoutesInit {
 					username
 				}
 			}
-		})).map(file => file.name)
+		})).map(file => ({name: file.name, id: file.id}))
 	}
+
+	@Log(FileRepository.log, {level: "debug", arguments: []})
+	async delete(id: number) {
+		await this.repo.delete({
+			id,
+		})
+	}
+
+	@Log(FileRepository.log, {level: "debug", arguments: []})
+	async exist(id: number) {
+		return (await this.findById(id)) !== undefined
+	}
+
 }

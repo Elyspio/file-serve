@@ -3,7 +3,7 @@ import {AuthenticationService} from "../services/authentication.service";
 import {ThemeService} from "../services/theme.service";
 import {LocalStorageService} from "../services/localStorage.service";
 import {DiKeysService} from "./di.keys.service"
-import {container} from "./di.container";
+import {container} from "./index";
 
 container
 	.bind<AuthenticationService>(DiKeysService.authentication)

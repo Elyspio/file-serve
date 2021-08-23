@@ -1,3 +1,18 @@
-.Test {
+.Files {
+	height: 100%;
+	width: 100%;
+
+	.file-header {
+		.actions {
+			opacity: 0;
+			transition: 0.3s;
+		}
+	}
+
+	.file-header:hover {
+		.actions {
+			opacity: 100%;
+		}
+	}
 
 }

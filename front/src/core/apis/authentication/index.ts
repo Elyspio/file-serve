@@ -10,7 +10,7 @@ const instance = axios.create({
 @injectable()
 export class AuthenticationApi {
 
-	public  readonly clients = {
+	public readonly clients = {
 		login: new baseAuth(undefined, window.config.endpoints.authentication, instance),
 		user: new UsersApi(undefined, window.config.endpoints.authentication, instance),
 	}

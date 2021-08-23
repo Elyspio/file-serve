@@ -19,7 +19,7 @@ export class UserRepository implements AfterRoutesInit {
 		this.repo = connection.getRepository(UserEntity);
 	}
 
-	@Log(UserRepository.log)
+	@Log(UserRepository.log, {level: "debug", arguments: []})
 	async create(username: string): Promise<UserEntity> {
 		return await this.repo.save({
 			username
@@ -27,7 +27,7 @@ export class UserRepository implements AfterRoutesInit {
 
 	}
 
-	@Log(UserRepository.log)
+	@Log(UserRepository.log, {level: "debug", arguments: []})
 	async find(username: string) {
 		return await this.repo.findOne({
 			where: {

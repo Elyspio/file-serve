@@ -11,6 +11,9 @@ import {Box} from "@material-ui/core";
 import {ReactComponent as Logout} from "../icons/logout.svg"
 import {login, logout} from "../../store/module/authentication/authentication.action";
 import {updateToastTheme} from "./utils/toast";
+import {Route, Switch as SwitchRouter} from 'react-router'
+import {routes} from "../../config/routes";
+import {Add} from "./files/add/Add";
 
 function Application() {
 
@@ -46,7 +49,10 @@ function Application() {
 
 
 	const drawer = withDrawer({
-		component: <Files/>,
+		component: <SwitchRouter>
+			<Route exact path={routes.home} component={Files}/>
+			<Route exact path={routes.addFile} component={Add}/>
+		</SwitchRouter>,
 		actions,
 		title: "Files"
 	})

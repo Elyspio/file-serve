@@ -3,6 +3,9 @@ import {ActionComponent, ActionComponentProps, ActionDescription, ActionDescript
 import {Box, Grid, Paper, Typography} from "@material-ui/core";
 import {Drawer} from "./Drawer";
 import "./actions/Actions.scss"
+import store from "../../../../store";
+import {push} from "connected-react-router";
+import {routes} from "../../../../config/routes";
 
 export type WithDrawerProps = {
 	component: React.ReactNode,
@@ -25,11 +28,13 @@ function Actions(props: { elements: WithDrawerProps["actions"] }) {
 
 export function withDrawer({component, title, actions}: WithDrawerProps) {
 
+	const redirectToHome = () => store.dispatch(push(routes.home))
+
 	return <Box className={"Drawer-hoc"}>
 		<Paper elevation={1} color={"red"}>
 			<Grid className={"header"} alignItems={"center"} justifyContent={"center"} container>
 				<Grid item>
-					<Typography variant={"h4"} align={"center"}>{title}</Typography>
+					<Typography variant={"h4"} align={"center"} id={"app-title"} onClick={redirectToHome}>{title}</Typography>
 				</Grid>
 			</Grid>
 		</Paper>

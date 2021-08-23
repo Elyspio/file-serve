@@ -22,7 +22,7 @@ export class AuthenticationService {
 
 	@Log(AuthenticationService.log, {level: "debug", arguments: []})
 	public async getUsername(token: string) {
-		return this.usersApi.client.getUserInfo("username", token).then(x => x.data);
+		return this.usersApi.client.getUserInfo("username", token, token).then(x => x.data);
 	}
 
 

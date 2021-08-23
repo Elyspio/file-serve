@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import {Provider} from "react-redux";
-import store, {useAppSelector} from "./store";
+import store, {history, useAppSelector} from "./store";
 import Application from "./view/components/Application";
 import {ThemeProvider} from '@material-ui/core';
 import {themes} from "./config/theme";
@@ -11,7 +11,8 @@ import {Config} from "./config/window";
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {Provider as DiProvider} from 'inversify-react';
-import {container} from "./core/di/di.container";
+import {container} from "./core/di";
+import {ConnectedRouter} from "connected-react-router";
 
 
 declare global {
@@ -37,7 +38,9 @@ function App() {
 	return (
 		<DiProvider container={container}>
 			<Provider store={store}>
-				<Wrapper/>
+				<ConnectedRouter history={history}>
+					<Wrapper/>
+				</ConnectedRouter>
 			</Provider>
 		</DiProvider>
 	);

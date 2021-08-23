@@ -32,6 +32,7 @@ $header-size: 4rem;
 		}
 	}
 
+
 }
 
 .Drawer-hoc {
@@ -39,5 +40,12 @@ $header-size: 4rem;
 
 	.header {
 		height: $header-size;
+
+		#app-title {
+			&:hover {
+				cursor: pointer;
+			}
+		}
 	}
+
 }

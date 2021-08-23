@@ -4,7 +4,7 @@ import {UserSettingsModelThemeEnum} from "../../../core/apis/authentication/gene
 import {setTheme} from "../theme/theme.action";
 import {AuthenticationEvents, AuthenticationService} from "../../../core/services/authentication.service";
 import {toast} from "react-toastify";
-import {container} from "../../../core/di/di.container";
+import {container} from "../../../core/di";
 import {DiKeysService} from "../../../core/di/di.keys.service";
 import {LocalStorageService} from "../../../core/services/localStorage.service";
 
@@ -36,7 +36,7 @@ function waitForLogin(page: Window) {
 		}
 
 		if (!(await func())) {
-			interval = setInterval(func, 500);
+			interval = setInterval(func, 100);
 		}
 	})
 
