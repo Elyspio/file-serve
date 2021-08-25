@@ -61,7 +61,7 @@ export class FilesController {
 	@Returns(500, InternalServerError).Description("Unexpected error")
 	@Description("Get the content of a file without authentication")
 	@Log(FilesController.log)
-	async getCommonFile(@PathParams("id") id: number) {
+	async getCommonFile(@PathParams("id") id: string) {
 		try {
 			return this.filesService.getCommonFile(id)
 		} catch (e: any) {
@@ -77,9 +77,9 @@ export class FilesController {
 	@Log(FilesController.log)
 	@Description("Get the content of a file of the logged user")
 	@Protected()
-	async getUserFile(@PathParams("id") id: number, @Req() req: Request) {
+	async getUserFile(@PathParams("id") id: string, @Req() req: Request) {
 		try {
-			return this.filesService.getFileContent(id, req.auth!.username)
+			return this.filesService.getFileContent(id)
 		} catch (e: any) {
 			switch (e) {
 				case FileService.exceptions.fileNotFound:
@@ -132,7 +132,7 @@ export class FilesController {
 	@Returns(204)
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
-	async deleteCommonFile(@PathParams("id") id: number) {
+	async deleteCommonFile(@PathParams("id") id: string) {
 		try {
 			await this.filesService.deleteCommonFile(id);
 		} catch (e) {
@@ -146,9 +146,9 @@ export class FilesController {
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
 	@Protected()
-	async deleteUserFile(@PathParams("id") id: number, @Req() req: Request) {
+	async deleteUserFile(@PathParams("id") id: string, @Req() req: Request) {
 		try {
-			return this.filesService.deleteFile(id, req.auth!.username);
+			return this.filesService.deleteFile(id);
 		} catch (e) {
 			switch (e) {
 				case FileService.exceptions.fileNotFound:

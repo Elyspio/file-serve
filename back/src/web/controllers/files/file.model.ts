@@ -7,6 +7,6 @@ export class FileModel {
 
 	@Required()
 	@Property()
-	id: number
+	id: string
 
 }

@@ -36,7 +36,7 @@ function waitForLogin(page: Window) {
 		}
 
 		if (!(await func())) {
-			interval = setInterval(func, 100);
+			interval = setInterval(func, 10);
 		}
 	})
 

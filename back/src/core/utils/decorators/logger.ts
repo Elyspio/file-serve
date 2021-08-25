@@ -23,7 +23,7 @@ export type LogOption =
  * @param logArguments false means that no argument is logged, [] means that all arguments are logged, [0] means that only the first argument is logged
  * @constructor
  */
-export const Log = (logger: Logger, {level, arguments: logArguments}: LogOption = {level: "info", arguments: []}) => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+export const Log = (logger: Logger, {level, arguments: logArguments}: LogOption = {level: "info", arguments: true}) => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 	let originalMethod = descriptor.value
 
 

@@ -11,3 +11,12 @@ services:
         ports:
             - "5433:5432"
         restart: always
+
+    mongo:
+        image: mongo
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: mysecretpassword
+        ports:
+            - "27017:27017"

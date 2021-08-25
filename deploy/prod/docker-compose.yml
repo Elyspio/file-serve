@@ -7,18 +7,40 @@ services:
             - "./config/front/conf.js:/front/conf.js"
         environment:
             AUTHENTICATION_SERVER_URI: "https://elyspio.fr/authentication"
+            DB_HOST: file-serve-db
+            DB_USERNAME: secured
+            DB_PASSWORD: secured
+            DB_DATABASE: admin
+            DB_PORT: 27017
         networks:
-            - frontend
+            - external
+            - file-serve-network
         labels:
             - "traefik.enable=true"
-            - "traefik.docker.network=frontend"
+            - "traefik.docker.network=external"
             - "traefik.http.middlewares.file-serve-prefix.stripprefix.prefixes=/file-serve"
             - "traefik.http.routers.file-serve.middlewares=file-serve-prefix@docker"
             - "traefik.http.routers.file-serve.rule=PathPrefix(`/file-serve`)"
             - "traefik.http.services.file-serve.loadbalancer.server.port=4000"
-            - "traefik.http.routers.file-serve.entrypoints=http"
+            - "traefik.http.routers.file-serve.entrypoints=external"
+        depends_on:
+            - file-serve-db
 
+    file-serve-db:
+        image: mongo
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: secured
+            MONGO_INITDB_ROOT_PASSWORD: secured
+        ports:
+            - "27017:27017"
+        networks:
+            - internal
+            - file-serve-network
 
 networks:
-    frontend:
+    file-serve-network:
+    internal:
+        external: true
+    external:
         external: true

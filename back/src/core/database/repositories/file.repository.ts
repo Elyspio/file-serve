@@ -1,14 +1,16 @@
 import {AfterRoutesInit, Service} from "@tsed/common";
 import {TypeORMService} from "@tsed/typeorm";
-import {Repository} from "typeorm"
-import {FileEntity} from "../entities/file.entity";
+import {MongoRepository} from "typeorm"
+import {UserEntity} from "../entities/user/user.entity";
 import {getLogger} from "../../utils/logger";
 import {Log} from "../../utils/decorators/logger";
+import {File} from "../entities/user/file";
+import {FileService} from "../../services/file.service";
 
 @Service()
 export class FileRepository implements AfterRoutesInit {
 	private static log = getLogger.service(FileRepository);
-	private repo: Repository<FileEntity>;
+	private repo: MongoRepository<UserEntity>;
 
 	constructor(private typeORMService: TypeORMService) {
 
@@ -16,65 +18,76 @@ export class FileRepository implements AfterRoutesInit {
 
 	$afterRoutesInit() {
 		const connection = this.typeORMService.get("postgres")!; // get connection by name
-		this.repo = connection.getRepository(FileEntity);
+		this.repo = connection.getMongoRepository(UserEntity);
 	}
 
 	@Log(FileRepository.log, {level: "debug", arguments: false})
-	async add(file: Omit<FileEntity, "id" | "user">, username: string): Promise<FileEntity> {
-		return await this.repo.save({
-			name: file.name,
-			content: file.content,
-			user: {
-				username
-			}
-		});
+	async add(filename: string, data: Buffer, username: string): Promise<File> {
+		const user = await this.getUser(username)
+		const id = `${username}-${user.files.length}`
+		const index = user.files.push(new File(id, filename, data.toString("base64"))) - 1
+		await this.repo.save(user);
+		return user.files[index];
 
 	}
 
-	@Log(FileRepository.log, {level: "debug", arguments: []})
-	async find(username: string): Promise<FileEntity[]> {
-		return await this.repo.find({
-			where: {
-				user: {
-					username
+	@Log(FileRepository.log, {level: "debug", arguments: true})
+	async find(username: string): Promise<File[]> {
+		const user = await this.getUser(username)
+		return user.files ?? [];
+	}
+
+
+	@Log(FileRepository.log, {level: "debug", arguments: true})
+	async findById(id: string): Promise<File | undefined> {
+		const user = (await this.repo.findOne({
+				where: {
+					"files.id": {$eq: id}
 				}
 			}
-		});
+		));
+		return user?.files.find(file => file.id === id);
 	}
 
 
-	@Log(FileRepository.log, {level: "debug", arguments: []})
-	async findById(id: number): Promise<FileEntity | undefined> {
-		return await this.repo.findOne({
-			where: {
-				id
+	@Log(FileRepository.log, {level: "debug", arguments: true})
+	async delete(id: string) {
+		const user = (await this.repo.findOne({
+				where: {
+					"files.id": {$eq: id}
+				}
+			}
+		));
+		if (!user) throw FileService.exceptions.fileNotFound;
+
+
+		user.files = user.files.filter(file => file.id !== id)
+
+		await this.repo.update({
+				id: user.id,
 			},
-			relations: ["user"]
-		});
+			{
+				files: user.files
+			})
+
 	}
 
-	@Log(FileRepository.log, {level: "debug", arguments: []})
-	async list(username: string) {
-		return (await this.repo.find({
-			select: ["name"],
+	@Log(FileRepository.log, {level: "debug", arguments: true})
+	async exist(id: string) {
+		return (await this.findById(id)) !== undefined
+	}
+
+
+	private async getUser(username) {
+		const user = await this.repo.findOne({
 			where: {
-				user: {
-					username
+				username: {
+					$eq: username
 				}
 			}
-		})).map(file => ({name: file.name, id: file.id}))
-	}
-
-	@Log(FileRepository.log, {level: "debug", arguments: []})
-	async delete(id: number) {
-		await this.repo.delete({
-			id,
 		})
-	}
-
-	@Log(FileRepository.log, {level: "debug", arguments: []})
-	async exist(id: number) {
-		return (await this.findById(id)) !== undefined
+		if (!user) throw FileService.exceptions.fileNotFound;
+		return user;
 	}
 
 }

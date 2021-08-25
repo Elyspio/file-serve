@@ -27,12 +27,12 @@ export class StorageService {
 		return writeFile(path.resolve(name), data);
 	}
 
-	@Log(StorageService.logger, {level: "debug", arguments: []})
+	@Log(StorageService.logger, {level: "debug", arguments: true})
 	async read(name: string) {
 		return (await readFile(name)).toString()
 	}
 
-	@Log(StorageService.logger, {level: "debug", arguments: []})
+	@Log(StorageService.logger, {level: "debug", arguments: true})
 	async createTempFile(content: string) {
 		const filename = crypto.randomBytes(16).toString("hex");
 		const tmpdir = path.join(os.tmpdir(), "backup-maker")
@@ -45,7 +45,7 @@ export class StorageService {
 		}
 	}
 
-	@Log(StorageService.logger, {level: "debug", arguments: []})
+	@Log(StorageService.logger, {level: "debug", arguments: true})
 	async exist(name: string) {
 		return access(name, fs.constants.F_OK)
 			.then(() => true)

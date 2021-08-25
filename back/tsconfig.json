@@ -25,7 +25,8 @@
 		"strictFunctionTypes": true
 	},
 	"include": [
-		"./src/**/*.ts"
+		"./src/**/*.ts",
+		"../deploy/prod/config/back/db.ts"
 	],
 	"exclude": [
 		"node_modules",

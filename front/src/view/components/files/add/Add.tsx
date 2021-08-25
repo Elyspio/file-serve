@@ -45,7 +45,6 @@ export function Add() {
 	}, [])
 
 
-
 	if (!logged) return <Box display={"flex"} justifyContent={"center"} alignItems={"center"}>
 		<Button onClick={() => dispatch(login())}>Please login before access to this page</Button>
 	</Box>

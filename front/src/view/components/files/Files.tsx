@@ -73,7 +73,7 @@ export const Files = () => {
 							>
 								<Title>Common files</Title>
 								<div className={"actions"}>
-									<IconButton onClick={user.reload}><Replay/></IconButton>
+									<IconButton onClick={common.reload}><Replay/></IconButton>
 									<IconButton onClick={addFile}><AddCircle/></IconButton>
 								</div>
 							</Box>
