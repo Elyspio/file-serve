@@ -42,8 +42,8 @@ export const Files = () => {
 
 	const dispatch = useAppDispatch();
 
-	const addFile = React.useCallback(() => {
-		dispatch(push(routes.addFile));
+	const addFile = React.useCallback((user: boolean) => () => {
+		dispatch(push({pathname: routes.addFile, state: {user}}));
 	}, [dispatch])
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
@@ -74,11 +74,11 @@ export const Files = () => {
 								<Title>Common files</Title>
 								<div className={"actions"}>
 									<IconButton onClick={common.reload}><Replay/></IconButton>
-									<IconButton onClick={addFile}><AddCircle/></IconButton>
+									<IconButton onClick={addFile(false)}><AddCircle/></IconButton>
 								</div>
 							</Box>
-							<Grid container direction={"column"}>
-								{common.data.map(file => <Grid item>
+							<Grid container direction={"column"} spacing={2}>
+								{common.data.map(file => <Grid item key={file.id}>
 									<File data={file} user={false}/>
 								</Grid>)}
 							</Grid>
@@ -111,11 +111,11 @@ export const Files = () => {
 										<Title>Your's files</Title>
 										<div className={"actions"}>
 											<IconButton onClick={user.reload}><Replay/></IconButton>
-											<IconButton onClick={addFile}><AddCircle/></IconButton>
+											<IconButton onClick={addFile(true)}><AddCircle/></IconButton>
 										</div>
 									</Box>
 									<Grid container direction={"column"}>
-										{user.data.map(file => <Grid item>
+										{user.data.map(file => <Grid item key={file.id}>
 											<File data={file} user={true}/>
 										</Grid>)}
 									</Grid>

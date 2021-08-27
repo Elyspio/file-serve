@@ -31,6 +31,7 @@ export function useAsyncState<T>(func: UseAsyncStateFuncParams<T>, defaultValue:
 			timer && clearInterval(timer);
 		}
 
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [func])
 
 

@@ -18,16 +18,16 @@ import globalAxios, {AxiosInstance, AxiosPromise} from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
 import {
-	assertParamExists,
-	createRequestFunction,
-	DUMMY_BASE_URL,
-	serializeDataIfNeeded,
-	setApiKeyToObject,
-	setBasicAuthToObject,
-	setBearerAuthToObject,
-	setOAuthToObject,
-	setSearchParams,
-	toPathString
+    assertParamExists,
+    createRequestFunction,
+    DUMMY_BASE_URL,
+    serializeDataIfNeeded,
+    setApiKeyToObject,
+    setBasicAuthToObject,
+    setBearerAuthToObject,
+    setOAuthToObject,
+    setSearchParams,
+    toPathString
 } from './common';
 // @ts-ignore
 import {BASE_PATH, BaseAPI, COLLECTION_FORMATS, RequestArgs, RequiredError} from './base';
@@ -88,6 +88,44 @@ export interface FileModel {
 	 * @memberof FileModel
 	 */
 	id: string;
+	/**
+	 *
+	 * @type {string}
+	 * @memberof FileModel
+	 */
+	mime: string;
+}
+
+/**
+ *
+ * @export
+ * @interface FileModelWithContent
+ */
+export interface FileModelWithContent {
+	/**
+	 *
+	 * @type {string}
+	 * @memberof FileModelWithContent
+	 */
+	name: string;
+	/**
+	 *
+	 * @type {string}
+	 * @memberof FileModelWithContent
+	 */
+	id: string;
+	/**
+	 *
+	 * @type {string}
+	 * @memberof FileModelWithContent
+	 */
+	mime: string;
+	/**
+	 *
+	 * @type {string}
+	 * @memberof FileModelWithContent
+	 */
+	content: string;
 }
 
 /**
@@ -590,7 +628,7 @@ export const FilesApiFp = function (configuration?: Configuration) {
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async getCommonFile(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+		async getCommonFile(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileModelWithContent>> {
 			const localVarAxiosArgs = await localVarAxiosParamCreator.getCommonFile(id, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
@@ -602,7 +640,7 @@ export const FilesApiFp = function (configuration?: Configuration) {
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+		async getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileModelWithContent>> {
 			const localVarAxiosArgs = await localVarAxiosParamCreator.getUserFile(id, authenticationToken, authenticationToken2, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
@@ -684,7 +722,7 @@ export const FilesApiFactory = function (configuration?: Configuration, basePath
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		getCommonFile(id: string, options?: any): AxiosPromise<string> {
+		getCommonFile(id: string, options?: any): AxiosPromise<FileModelWithContent> {
 			return localVarFp.getCommonFile(id, options).then((request) => request(axios, basePath));
 		},
 		/**
@@ -695,7 +733,7 @@ export const FilesApiFactory = function (configuration?: Configuration, basePath
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<string> {
+		getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<FileModelWithContent> {
 			return localVarFp.getUserFile(id, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
 		},
 		/**

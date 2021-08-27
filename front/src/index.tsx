@@ -5,7 +5,7 @@ import './index.scss';
 import {Provider} from "react-redux";
 import store, {history, useAppSelector} from "./store";
 import Application from "./view/components/Application";
-import {ThemeProvider} from '@material-ui/core';
+import {CssBaseline, ThemeProvider} from '@material-ui/core';
 import {themes} from "./config/theme";
 import {Config} from "./config/window";
 import {ToastContainer} from "react-toastify";
@@ -25,10 +25,12 @@ declare global {
 function Wrapper() {
 	const theme = useAppSelector(state => state.theme.current === "dark" ? themes.dark : themes.light)
 
+
 	return (
 		<ThemeProvider theme={theme}>
 			<Application/>
 			<ToastContainer position={"top-left"}/>
+			<CssBaseline/>
 		</ThemeProvider>
 	);
 }

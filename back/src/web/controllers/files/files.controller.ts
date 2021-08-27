@@ -8,7 +8,7 @@ import {NotFound} from "@tsed/exceptions";
 import {InternalServerError} from "@tsed/exceptions/lib/serverErrors";
 import {Request} from "express";
 import {Protected} from "../../decorators/protected";
-import {FileModel} from "./file.model";
+import {FileModel, FileModelWithContent} from "./file.model";
 import {Forbidden} from "@tsed/exceptions/lib/clientErrors";
 
 @Controller("/files")
@@ -56,12 +56,14 @@ export class FilesController {
 
 
 	@Get("/:id")
-	@Returns(200, String).ContentType("text/plain")
+	@Returns(200, FileModelWithContent)
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
 	@Description("Get the content of a file without authentication")
 	@Log(FilesController.log)
-	async getCommonFile(@PathParams("id") id: string) {
+	async getCommonFile(
+		@PathParams("id") id: string
+	) {
 		try {
 			return this.filesService.getCommonFile(id)
 		} catch (e: any) {
@@ -72,12 +74,15 @@ export class FilesController {
 
 
 	@Get("/user/:id")
-	@Returns(200, String).ContentType("text/plain")
+	@Returns(200, FileModelWithContent)
 	@Returns(404, NotFound).Description("File not found")
 	@Log(FilesController.log)
 	@Description("Get the content of a file of the logged user")
 	@Protected()
-	async getUserFile(@PathParams("id") id: string, @Req() req: Request) {
+	async getUserFile(
+		@PathParams("id") id: string,
+		@Req() req: Request
+	) {
 		try {
 			return this.filesService.getFileContent(id)
 		} catch (e: any) {
@@ -100,9 +105,12 @@ export class FilesController {
 	@Returns(201, Number).ContentType("text/plain")
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
-	async addCommonFile(@PathParams("filename") filename: string, @Required() @MultipartFile("file") file: PlatformMulterFile) {
+	async addCommonFile(
+		@PathParams("filename") filename: string,
+		@Required() @MultipartFile("file") file: PlatformMulterFile
+	) {
 		try {
-			return this.filesService.addCommonFile(filename, file.buffer);
+			return this.filesService.addCommonFile(filename, file.buffer, file.mimetype);
 		} catch (e) {
 			throw new InternalServerError((e as Error).message)
 		}
@@ -113,9 +121,13 @@ export class FilesController {
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
 	@Protected()
-	async addUserFile(@PathParams("filename") filename: string, @Required() @MultipartFile("file") file: PlatformMulterFile, @Req() req: Request) {
+	async addUserFile(
+		@Required() @PathParams("filename") filename: string,
+		@Required() @MultipartFile("file") file: PlatformMulterFile,
+		@Req() req: Request
+	) {
 		try {
-			return this.filesService.addFile(req.auth!.username, filename, file.buffer);
+			return this.filesService.addFile(req.auth!.username, filename, file.buffer, file.mimetype);
 		} catch (e) {
 			switch (e) {
 				default:
@@ -132,7 +144,9 @@ export class FilesController {
 	@Returns(204)
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
-	async deleteCommonFile(@PathParams("id") id: string) {
+	async deleteCommonFile(
+		@PathParams("id") id: string
+	) {
 		try {
 			await this.filesService.deleteCommonFile(id);
 		} catch (e) {
@@ -146,7 +160,10 @@ export class FilesController {
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
 	@Protected()
-	async deleteUserFile(@PathParams("id") id: string, @Req() req: Request) {
+	async deleteUserFile(
+		@PathParams("id") id: string,
+		@Req() req: Request
+	) {
 		try {
 			return this.filesService.deleteFile(id);
 		} catch (e) {

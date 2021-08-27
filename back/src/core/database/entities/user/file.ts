@@ -15,11 +15,15 @@ export class File {
 	@Column()
 	content: string
 
+	@Column()
+	mime: string
 
-	constructor(id: string, name: string, content: string) {
+
+	constructor(id: string, name: string, content: string, mime: string) {
 		this.id = id;
 		this.name = name;
 		this.content = content;
+		this.mime = mime;
 	}
 }
 

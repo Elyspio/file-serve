@@ -9,6 +9,7 @@ import {useAppDispatch, useAppSelector} from "../../../../store";
 import {push} from "connected-react-router";
 import {routes} from "../../../../config/routes";
 import {login} from "../../../../store/module/authentication/authentication.action";
+import {useHistory} from 'react-router-dom';
 
 const fileTypes = {
 	user: "user",
@@ -22,18 +23,22 @@ export function Add() {
 	}
 
 	const logged = useAppSelector(s => s.authentication.logged);
+
+
 	const dispatch = useAppDispatch();
 
-	const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>("user");
+	const {location: {state}} = useHistory<{ user: boolean }>();
+	// const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(user ? "user": "common");
+	const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(state?.user ? "user" : "common");
 	const [files, setFile] = React.useState<FileList | null>(null)
 	const [filename, setFilename] = React.useState("")
 
-	const create = async () => {
+	const create = React.useCallback(async () => {
 		if (files !== null && files.length > 0) {
 			await services.files.add[fileType](filename, files[0])
 			dispatch(push(routes.home))
 		}
-	}
+	}, [dispatch, fileType, services.files, filename, files])
 
 
 	const handleFile = React.useCallback((e) => {
@@ -49,8 +54,9 @@ export function Add() {
 		<Button onClick={() => dispatch(login())}>Please login before access to this page</Button>
 	</Box>
 
+	const emptyFile = files === null || files?.length === 0;
 	return <Paper className={"Add"}>
-		<Box px={4} py={4}>
+		<Box px={8} py={4}>
 			<Grid container direction={"column"} alignItems={"center"} spacing={6}>
 
 				<Grid item xs={12} container alignItems={"center"} direction={"column"}>
@@ -58,17 +64,6 @@ export function Add() {
 					<Divider className={"Divider"}/>
 				</Grid>
 
-				<Grid item xs={12} container>
-					<FormControl fullWidth>
-						<TextField
-							id="outlined-basic"
-							label="Filename"
-							variant="outlined"
-							value={filename}
-							onChange={e => setFilename(e.target.value)}
-						/>
-					</FormControl>
-				</Grid>
 
 				<Grid item xs={12} container>
 					<FormControl fullWidth>
@@ -87,10 +82,13 @@ export function Add() {
 					</FormControl>
 				</Grid>
 
-				<Grid item xs={12}>
+				<Grid item xs={12} container>
 					<Button
 						variant="outlined"
 						component="label"
+						fullWidth
+						title={emptyFile ? "Select a file" : "Replace selected file"}
+
 					>
 						Upload File
 						<input
@@ -101,12 +99,24 @@ export function Add() {
 					</Button>
 				</Grid>
 
+				<Grid item xs={12} container>
+					<FormControl fullWidth>
+						<TextField
+							id="outlined-basic"
+							label="Filename"
+							variant="outlined"
+							value={filename}
+							disabled={emptyFile}
+							onChange={e => setFilename(e.target.value)}
+						/>
+					</FormControl>
+				</Grid>
 
 				<Grid item xs={12} container justifyContent={"center"}>
 					<Button
 						color={"primary"}
 						variant={"outlined"}
-						disabled={filename.length === 0 || files === null || files?.length === 0}
+						disabled={filename.length === 0 || emptyFile}
 						onClick={create}
 					>
 						Create
@@ -120,4 +130,5 @@ export function Add() {
 
 
 }
+
 

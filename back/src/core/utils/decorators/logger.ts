@@ -1,5 +1,6 @@
 import {Logger} from "@tsed/logger";
 import {Helper} from "../helper";
+import {inspect} from "util";
 
 
 declare global {
@@ -37,7 +38,7 @@ export const Log = (logger: Logger, {level, arguments: logArguments}: LogOption 
 				if (logArguments !== true) {
 					if (!logArguments?.includes(currentIndex)) return previousValue;
 				}
-				return `${previousValue} ${currentValue}=${JSON.stringify(args[currentIndex])}`
+				return `${previousValue} ${currentValue}=${inspect(args[currentIndex])}`
 			}, "-");
 		}
 

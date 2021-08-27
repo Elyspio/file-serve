@@ -12,8 +12,10 @@ import {ReactComponent as Logout} from "../icons/logout.svg"
 import {login, logout} from "../../store/module/authentication/authentication.action";
 import {updateToastTheme} from "./utils/toast";
 import {Route, Switch as SwitchRouter} from 'react-router'
-import {routes} from "../../config/routes";
+import {Routes, routes} from "../../config/routes";
 import {Add} from "./files/add/Add";
+import {AddCircle, Home} from "@material-ui/icons";
+import {push} from "connected-react-router";
 
 function Application() {
 
@@ -47,6 +49,27 @@ function Application() {
 		}))
 	}
 
+	const {home} = useAppSelector(s => {
+		const path = s.router.location.pathname;
+		const obj: { [key in Routes]?: boolean } = {}
+		Object.keys(routes).forEach((key) => {
+			obj[key] = path === routes[key];
+			return obj;
+		})
+		return obj;
+	})
+
+	if (!home) {
+		actions.push(createDrawerAction("Home", {
+			icon: <Home fill={"currentColor"}/>,
+			onClick: () => dispatch(push(routes.home))
+		}))
+	} else {
+		actions.push(createDrawerAction("Add file", {
+			icon: <AddCircle fill={"currentColor"}/>,
+			onClick: () => dispatch(push(routes.addFile))
+		}))
+	}
 
 	const drawer = withDrawer({
 		component: <SwitchRouter>

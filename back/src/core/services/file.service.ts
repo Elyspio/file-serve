@@ -32,7 +32,7 @@ export class FileService {
 	async getFileContent(id: string) {
 		const file = await this.repositories.files.findById(id);
 		if (!file) throw FileService.exceptions.fileNotFound
-		return new Buffer(file.content, 'base64').toString("utf8")
+		return file;
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: true})
@@ -43,18 +43,18 @@ export class FileService {
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async listFiles(username: string) {
 		return (await this.repositories.files.find(username))
-			.map(file => ({name: file.name, id: file.id}));
+			.map(file => ({name: file.name, id: file.id, mime: file.mime}));
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: [0]})
-	async addCommonFile(filename: string, buffer: Buffer) {
-		return this.addFile(this.commonUsername, filename, buffer)
+	async addCommonFile(filename: string, buffer: Buffer, mime: string) {
+		return this.addFile(this.commonUsername, filename, buffer, mime)
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: [0, 1]})
-	async addFile(username: string, filename: string, buffer: Buffer) {
+	async addFile(username: string, filename: string, buffer: Buffer, mime: string) {
 		await this.ensureUserExist(username);
-		return (await this.repositories.files.add(filename, buffer, username)).id
+		return (await this.repositories.files.add(filename, buffer, username, mime)).id
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: true})

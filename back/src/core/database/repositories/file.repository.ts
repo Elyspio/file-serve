@@ -22,10 +22,10 @@ export class FileRepository implements AfterRoutesInit {
 	}
 
 	@Log(FileRepository.log, {level: "debug", arguments: false})
-	async add(filename: string, data: Buffer, username: string): Promise<File> {
+	async add(filename: string, data: Buffer, username: string, mime: string): Promise<File> {
 		const user = await this.getUser(username)
 		const id = `${username}-${user.files.length}`
-		const index = user.files.push(new File(id, filename, data.toString("base64"))) - 1
+		const index = user.files.push(new File(id, filename, data.toString("base64"), mime)) - 1
 		await this.repo.save(user);
 		return user.files[index];
 

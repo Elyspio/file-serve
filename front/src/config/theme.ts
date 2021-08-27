@@ -7,6 +7,7 @@ import {container} from "../core/di";
 import {DiKeysService} from "../core/di/di.keys.service";
 
 const darkTheme = createTheme(({
+
 	palette: {
 		type: "dark",
 		secondary: {
@@ -24,6 +25,26 @@ const darkTheme = createTheme(({
 		}
 
 	},
+	overrides: {
+		MuiCssBaseline: {
+			'@global': {
+				'*': {
+					'scrollbar-width': 'thin',
+				},
+				'*::-webkit-scrollbar': {
+					width: '4px',
+					height: '4px',
+					backgroundColor: "#222"
+				},
+				'*::-webkit-scrollbar-track': {
+					'-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0.00)'
+				},
+				'*::-webkit-scrollbar-thumb': {
+					backgroundColor: "#CCC"
+				}
+			}
+		}
+	}
 }));
 
 const lightTheme = createTheme(({
@@ -38,6 +59,26 @@ const lightTheme = createTheme(({
 			main: colors.blue["400"],
 		},
 	},
+	overrides: {
+		MuiCssBaseline: {
+			'@global': {
+				'*': {
+					'scrollbar-width': 'thin',
+				},
+				'*::-webkit-scrollbar': {
+					width: '4px',
+					height: '4px',
+					backgroundColor: "#CCC"
+				},
+				'*::-webkit-scrollbar-track': {
+					'-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0.00)'
+				},
+				'*::-webkit-scrollbar-thumb': {
+					backgroundColor: "#333"
+				}
+			}
+		}
+	}
 }));
 
 export const themes = {
