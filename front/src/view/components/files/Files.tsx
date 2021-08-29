@@ -51,6 +51,7 @@ export const Files = () => {
 				>
 					<Paper>
 						<Box
+							className={"files-container"}
 							display={"flex"}
 							flexDirection={"column"}
 							alignItems={"center"}
@@ -91,6 +92,7 @@ export const Files = () => {
 							width={"100%"}
 							flexDirection={"column"}
 							alignItems={"center"}
+							className={"files-container"}
 							justifyContent={"center"}
 						>
 							{logged
