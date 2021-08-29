@@ -18,16 +18,16 @@ import globalAxios, {AxiosInstance, AxiosPromise} from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
 import {
-    assertParamExists,
-    createRequestFunction,
-    DUMMY_BASE_URL,
-    serializeDataIfNeeded,
-    setApiKeyToObject,
-    setBasicAuthToObject,
-    setBearerAuthToObject,
-    setOAuthToObject,
-    setSearchParams,
-    toPathString
+	assertParamExists,
+	createRequestFunction,
+	DUMMY_BASE_URL,
+	serializeDataIfNeeded,
+	setApiKeyToObject,
+	setBasicAuthToObject,
+	setBearerAuthToObject,
+	setOAuthToObject,
+	setSearchParams,
+	toPathString
 } from './common';
 // @ts-ignore
 import {BASE_PATH, BaseAPI, COLLECTION_FORMATS, RequestArgs, RequiredError} from './base';
@@ -265,10 +265,10 @@ export interface NotFound {
 }
 
 /**
- * FilesApi - axios parameter creator
+ * PublicApi - axios parameter creator
  * @export
  */
-export const FilesApiAxiosParamCreator = function (configuration?: Configuration) {
+export const PublicApiAxiosParamCreator = function (configuration?: Configuration) {
 	return {
 		/**
 		 *
@@ -277,12 +277,12 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		addCommonFile: async (filename: string, file: any, options: any = {}): Promise<RequestArgs> => {
+		addFile: async (filename: string, file: any, options: any = {}): Promise<RequestArgs> => {
 			// verify required parameter 'filename' is not null or undefined
-			assertParamExists('addCommonFile', 'filename', filename)
+			assertParamExists('addFile', 'filename', filename)
 			// verify required parameter 'file' is not null or undefined
-			assertParamExists('addCommonFile', 'file', file)
-			const localVarPath = `/api/files/{filename}`
+			assertParamExists('addFile', 'file', file)
+			const localVarPath = `/api/files/public/{filename}`
 				.replace(`{${"filename"}}`, encodeURIComponent(String(filename)));
 			// use dummy base URL string because the URL constructor only accepts absolute URLs.
 			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -316,6 +316,318 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 		},
 		/**
 		 *
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		deleteFile: async (id: string, options: any = {}): Promise<RequestArgs> => {
+			// verify required parameter 'id' is not null or undefined
+			assertParamExists('deleteFile', 'id', id)
+			const localVarPath = `/api/files/public/{id}`
+				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
+			// use dummy base URL string because the URL constructor only accepts absolute URLs.
+			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+			let baseOptions;
+			if (configuration) {
+				baseOptions = configuration.baseOptions;
+			}
+
+			const localVarRequestOptions = {method: 'DELETE', ...baseOptions, ...options};
+			const localVarHeaderParameter = {} as any;
+			const localVarQueryParameter = {} as any;
+
+
+			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+			let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+			localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+			return {
+				url: toPathString(localVarUrlObj),
+				options: localVarRequestOptions,
+			};
+		},
+		/**
+		 * Get the content of a file without authentication
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		getFile: async (id: string, options: any = {}): Promise<RequestArgs> => {
+			// verify required parameter 'id' is not null or undefined
+			assertParamExists('getFile', 'id', id)
+			const localVarPath = `/api/files/public/{id}`
+				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
+			// use dummy base URL string because the URL constructor only accepts absolute URLs.
+			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+			let baseOptions;
+			if (configuration) {
+				baseOptions = configuration.baseOptions;
+			}
+
+			const localVarRequestOptions = {method: 'GET', ...baseOptions, ...options};
+			const localVarHeaderParameter = {} as any;
+			const localVarQueryParameter = {} as any;
+
+
+			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+			let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+			localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+			return {
+				url: toPathString(localVarUrlObj),
+				options: localVarRequestOptions,
+			};
+		},
+		/**
+		 * Get the content of a file without authentication
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		getFileContent: async (id: string, options: any = {}): Promise<RequestArgs> => {
+			// verify required parameter 'id' is not null or undefined
+			assertParamExists('getFileContent', 'id', id)
+			const localVarPath = `/api/files/public/{id}/content`
+				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
+			// use dummy base URL string because the URL constructor only accepts absolute URLs.
+			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+			let baseOptions;
+			if (configuration) {
+				baseOptions = configuration.baseOptions;
+			}
+
+			const localVarRequestOptions = {method: 'GET', ...baseOptions, ...options};
+			const localVarHeaderParameter = {} as any;
+			const localVarQueryParameter = {} as any;
+
+
+			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+			let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+			localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+			return {
+				url: toPathString(localVarUrlObj),
+				options: localVarRequestOptions,
+			};
+		},
+		/**
+		 * Get all common files name
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		listFiles: async (options: any = {}): Promise<RequestArgs> => {
+			const localVarPath = `/api/files/public`;
+			// use dummy base URL string because the URL constructor only accepts absolute URLs.
+			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+			let baseOptions;
+			if (configuration) {
+				baseOptions = configuration.baseOptions;
+			}
+
+			const localVarRequestOptions = {method: 'GET', ...baseOptions, ...options};
+			const localVarHeaderParameter = {} as any;
+			const localVarQueryParameter = {} as any;
+
+
+			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+			let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+			localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+			return {
+				url: toPathString(localVarUrlObj),
+				options: localVarRequestOptions,
+			};
+		},
+	}
+};
+
+/**
+ * PublicApi - functional programming interface
+ * @export
+ */
+export const PublicApiFp = function (configuration?: Configuration) {
+	const localVarAxiosParamCreator = PublicApiAxiosParamCreator(configuration)
+	return {
+		/**
+		 *
+		 * @param {string} filename
+		 * @param {any} file
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		async addFile(filename: string, file: any, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.addFile(filename, file, options);
+			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+		},
+		/**
+		 *
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		async deleteFile(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.deleteFile(id, options);
+			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+		},
+		/**
+		 * Get the content of a file without authentication
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		async getFile(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileModelWithContent>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.getFile(id, options);
+			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+		},
+		/**
+		 * Get the content of a file without authentication
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		async getFileContent(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.getFileContent(id, options);
+			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+		},
+		/**
+		 * Get all common files name
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		async listFiles(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileModel>>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.listFiles(options);
+			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+		},
+	}
+};
+
+/**
+ * PublicApi - factory interface
+ * @export
+ */
+export const PublicApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+	const localVarFp = PublicApiFp(configuration)
+	return {
+		/**
+		 *
+		 * @param {string} filename
+		 * @param {any} file
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		addFile(filename: string, file: any, options?: any): AxiosPromise<number> {
+			return localVarFp.addFile(filename, file, options).then((request) => request(axios, basePath));
+		},
+		/**
+		 *
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		deleteFile(id: string, options?: any): AxiosPromise<void> {
+			return localVarFp.deleteFile(id, options).then((request) => request(axios, basePath));
+		},
+		/**
+		 * Get the content of a file without authentication
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		getFile(id: string, options?: any): AxiosPromise<FileModelWithContent> {
+			return localVarFp.getFile(id, options).then((request) => request(axios, basePath));
+		},
+		/**
+		 * Get the content of a file without authentication
+		 * @param {string} id
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		getFileContent(id: string, options?: any): AxiosPromise<string> {
+			return localVarFp.getFileContent(id, options).then((request) => request(axios, basePath));
+		},
+		/**
+		 * Get all common files name
+		 * @param {*} [options] Override http request option.
+		 * @throws {RequiredError}
+		 */
+		listFiles(options?: any): AxiosPromise<Array<FileModel>> {
+			return localVarFp.listFiles(options).then((request) => request(axios, basePath));
+		},
+	};
+};
+
+/**
+ * PublicApi - object-oriented interface
+ * @export
+ * @class PublicApi
+ * @extends {BaseAPI}
+ */
+export class PublicApi extends BaseAPI {
+	/**
+	 *
+	 * @param {string} filename
+	 * @param {any} file
+	 * @param {*} [options] Override http request option.
+	 * @throws {RequiredError}
+	 * @memberof PublicApi
+	 */
+	public addFile(filename: string, file: any, options?: any) {
+		return PublicApiFp(this.configuration).addFile(filename, file, options).then((request) => request(this.axios, this.basePath));
+	}
+
+	/**
+	 *
+	 * @param {string} id
+	 * @param {*} [options] Override http request option.
+	 * @throws {RequiredError}
+	 * @memberof PublicApi
+	 */
+	public deleteFile(id: string, options?: any) {
+		return PublicApiFp(this.configuration).deleteFile(id, options).then((request) => request(this.axios, this.basePath));
+	}
+
+	/**
+	 * Get the content of a file without authentication
+	 * @param {string} id
+	 * @param {*} [options] Override http request option.
+	 * @throws {RequiredError}
+	 * @memberof PublicApi
+	 */
+	public getFile(id: string, options?: any) {
+		return PublicApiFp(this.configuration).getFile(id, options).then((request) => request(this.axios, this.basePath));
+	}
+
+	/**
+	 * Get the content of a file without authentication
+	 * @param {string} id
+	 * @param {*} [options] Override http request option.
+	 * @throws {RequiredError}
+	 * @memberof PublicApi
+	 */
+	public getFileContent(id: string, options?: any) {
+		return PublicApiFp(this.configuration).getFileContent(id, options).then((request) => request(this.axios, this.basePath));
+	}
+
+	/**
+	 * Get all common files name
+	 * @param {*} [options] Override http request option.
+	 * @throws {RequiredError}
+	 * @memberof PublicApi
+	 */
+	public listFiles(options?: any) {
+		return PublicApiFp(this.configuration).listFiles(options).then((request) => request(this.axios, this.basePath));
+	}
+}
+
+
+/**
+ * UserApi - axios parameter creator
+ * @export
+ */
+export const UserApiAxiosParamCreator = function (configuration?: Configuration) {
+	return {
+		/**
+		 *
 		 * @param {string} filename
 		 * @param {any} file
 		 * @param {string} [authenticationToken]
@@ -323,11 +635,11 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		addUserFile: async (filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
+		addFile: async (filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
 			// verify required parameter 'filename' is not null or undefined
-			assertParamExists('addUserFile', 'filename', filename)
+			assertParamExists('addFile', 'filename', filename)
 			// verify required parameter 'file' is not null or undefined
-			assertParamExists('addUserFile', 'file', file)
+			assertParamExists('addFile', 'file', file)
 			const localVarPath = `/api/files/user/{filename}`
 				.replace(`{${"filename"}}`, encodeURIComponent(String(filename)));
 			// use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -367,46 +679,14 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 		/**
 		 *
 		 * @param {string} id
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		deleteCommonFile: async (id: string, options: any = {}): Promise<RequestArgs> => {
-			// verify required parameter 'id' is not null or undefined
-			assertParamExists('deleteCommonFile', 'id', id)
-			const localVarPath = `/api/files/{id}`
-				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
-			// use dummy base URL string because the URL constructor only accepts absolute URLs.
-			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-			let baseOptions;
-			if (configuration) {
-				baseOptions = configuration.baseOptions;
-			}
-
-			const localVarRequestOptions = {method: 'DELETE', ...baseOptions, ...options};
-			const localVarHeaderParameter = {} as any;
-			const localVarQueryParameter = {} as any;
-
-
-			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-			let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-			localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-			return {
-				url: toPathString(localVarUrlObj),
-				options: localVarRequestOptions,
-			};
-		},
-		/**
-		 *
-		 * @param {string} id
 		 * @param {string} [authenticationToken]
 		 * @param {string} [authenticationToken2]
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		deleteUserFile: async (id: string, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
+		deleteFile: async (id: string, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
 			// verify required parameter 'id' is not null or undefined
-			assertParamExists('deleteUserFile', 'id', id)
+			assertParamExists('deleteFile', 'id', id)
 			const localVarPath = `/api/files/user/{id}`
 				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
 			// use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -423,38 +703,6 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 			if (authenticationToken !== undefined && authenticationToken !== null) {
 				localVarHeaderParameter['authentication-token'] = String(authenticationToken);
 			}
-
-
-			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-			let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-			localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-			return {
-				url: toPathString(localVarUrlObj),
-				options: localVarRequestOptions,
-			};
-		},
-		/**
-		 * Get the content of a file without authentication
-		 * @param {string} id
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		getCommonFile: async (id: string, options: any = {}): Promise<RequestArgs> => {
-			// verify required parameter 'id' is not null or undefined
-			assertParamExists('getCommonFile', 'id', id)
-			const localVarPath = `/api/files/{id}`
-				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
-			// use dummy base URL string because the URL constructor only accepts absolute URLs.
-			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-			let baseOptions;
-			if (configuration) {
-				baseOptions = configuration.baseOptions;
-			}
-
-			const localVarRequestOptions = {method: 'GET', ...baseOptions, ...options};
-			const localVarHeaderParameter = {} as any;
-			const localVarQueryParameter = {} as any;
 
 
 			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
@@ -474,9 +722,9 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		getUserFile: async (id: string, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
+		getFile: async (id: string, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
 			// verify required parameter 'id' is not null or undefined
-			assertParamExists('getUserFile', 'id', id)
+			assertParamExists('getFile', 'id', id)
 			const localVarPath = `/api/files/user/{id}`
 				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
 			// use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -505,12 +753,18 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 			};
 		},
 		/**
-		 * Get all common files name
+		 * Get the content of a file of the logged user
+		 * @param {string} id
+		 * @param {string} [authenticationToken]
+		 * @param {string} [authenticationToken2]
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		listCommonFiles: async (options: any = {}): Promise<RequestArgs> => {
-			const localVarPath = `/api/files`;
+		getFileContent: async (id: string, authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
+			// verify required parameter 'id' is not null or undefined
+			assertParamExists('getFileContent', 'id', id)
+			const localVarPath = `/api/files/user/{id}/content`
+				.replace(`{${"id"}}`, encodeURIComponent(String(id)));
 			// use dummy base URL string because the URL constructor only accepts absolute URLs.
 			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
 			let baseOptions;
@@ -521,6 +775,10 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 			const localVarRequestOptions = {method: 'GET', ...baseOptions, ...options};
 			const localVarHeaderParameter = {} as any;
 			const localVarQueryParameter = {} as any;
+
+			if (authenticationToken !== undefined && authenticationToken !== null) {
+				localVarHeaderParameter['authentication-token'] = String(authenticationToken);
+			}
 
 
 			setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
@@ -539,7 +797,7 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		listUserFiles: async (authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
+		listFiles: async (authenticationToken?: string, authenticationToken2?: string, options: any = {}): Promise<RequestArgs> => {
 			const localVarPath = `/api/files/user`;
 			// use dummy base URL string because the URL constructor only accepts absolute URLs.
 			const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -570,44 +828,23 @@ export const FilesApiAxiosParamCreator = function (configuration?: Configuration
 };
 
 /**
- * FilesApi - functional programming interface
+ * UserApi - functional programming interface
  * @export
  */
-export const FilesApiFp = function (configuration?: Configuration) {
-	const localVarAxiosParamCreator = FilesApiAxiosParamCreator(configuration)
+export const UserApiFp = function (configuration?: Configuration) {
+	const localVarAxiosParamCreator = UserApiAxiosParamCreator(configuration)
 	return {
 		/**
 		 *
 		 * @param {string} filename
 		 * @param {any} file
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		async addCommonFile(filename: string, file: any, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.addCommonFile(filename, file, options);
-			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-		},
-		/**
-		 *
-		 * @param {string} filename
-		 * @param {any} file
 		 * @param {string} [authenticationToken]
 		 * @param {string} [authenticationToken2]
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async addUserFile(filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.addUserFile(filename, file, authenticationToken, authenticationToken2, options);
-			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-		},
-		/**
-		 *
-		 * @param {string} id
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		async deleteCommonFile(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.deleteCommonFile(id, options);
+		async addFile(filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.addFile(filename, file, authenticationToken, authenticationToken2, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
 		/**
@@ -618,18 +855,8 @@ export const FilesApiFp = function (configuration?: Configuration) {
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async deleteUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.deleteUserFile(id, authenticationToken, authenticationToken2, options);
-			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-		},
-		/**
-		 * Get the content of a file without authentication
-		 * @param {string} id
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		async getCommonFile(id: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileModelWithContent>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.getCommonFile(id, options);
+		async deleteFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.deleteFile(id, authenticationToken, authenticationToken2, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
 		/**
@@ -640,17 +867,20 @@ export const FilesApiFp = function (configuration?: Configuration) {
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileModelWithContent>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.getUserFile(id, authenticationToken, authenticationToken2, options);
+		async getFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileModelWithContent>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.getFile(id, authenticationToken, authenticationToken2, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
 		/**
-		 * Get all common files name
+		 * Get the content of a file of the logged user
+		 * @param {string} id
+		 * @param {string} [authenticationToken]
+		 * @param {string} [authenticationToken2]
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async listCommonFiles(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileModel>>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.listCommonFiles(options);
+		async getFileContent(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.getFileContent(id, authenticationToken, authenticationToken2, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
 		/**
@@ -660,50 +890,31 @@ export const FilesApiFp = function (configuration?: Configuration) {
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		async listUserFiles(authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileModel>>> {
-			const localVarAxiosArgs = await localVarAxiosParamCreator.listUserFiles(authenticationToken, authenticationToken2, options);
+		async listFiles(authenticationToken?: string, authenticationToken2?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileModel>>> {
+			const localVarAxiosArgs = await localVarAxiosParamCreator.listFiles(authenticationToken, authenticationToken2, options);
 			return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
 		},
 	}
 };
 
 /**
- * FilesApi - factory interface
+ * UserApi - factory interface
  * @export
  */
-export const FilesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-	const localVarFp = FilesApiFp(configuration)
+export const UserApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+	const localVarFp = UserApiFp(configuration)
 	return {
 		/**
 		 *
 		 * @param {string} filename
 		 * @param {any} file
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		addCommonFile(filename: string, file: any, options?: any): AxiosPromise<number> {
-			return localVarFp.addCommonFile(filename, file, options).then((request) => request(axios, basePath));
-		},
-		/**
-		 *
-		 * @param {string} filename
-		 * @param {any} file
 		 * @param {string} [authenticationToken]
 		 * @param {string} [authenticationToken2]
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		addUserFile(filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<number> {
-			return localVarFp.addUserFile(filename, file, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
-		},
-		/**
-		 *
-		 * @param {string} id
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		deleteCommonFile(id: string, options?: any): AxiosPromise<void> {
-			return localVarFp.deleteCommonFile(id, options).then((request) => request(axios, basePath));
+		addFile(filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<number> {
+			return localVarFp.addFile(filename, file, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
 		},
 		/**
 		 *
@@ -713,17 +924,8 @@ export const FilesApiFactory = function (configuration?: Configuration, basePath
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		deleteUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<void> {
-			return localVarFp.deleteUserFile(id, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
-		},
-		/**
-		 * Get the content of a file without authentication
-		 * @param {string} id
-		 * @param {*} [options] Override http request option.
-		 * @throws {RequiredError}
-		 */
-		getCommonFile(id: string, options?: any): AxiosPromise<FileModelWithContent> {
-			return localVarFp.getCommonFile(id, options).then((request) => request(axios, basePath));
+		deleteFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<void> {
+			return localVarFp.deleteFile(id, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
 		},
 		/**
 		 * Get the content of a file of the logged user
@@ -733,16 +935,19 @@ export const FilesApiFactory = function (configuration?: Configuration, basePath
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<FileModelWithContent> {
-			return localVarFp.getUserFile(id, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
+		getFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<FileModelWithContent> {
+			return localVarFp.getFile(id, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
 		},
 		/**
-		 * Get all common files name
+		 * Get the content of a file of the logged user
+		 * @param {string} id
+		 * @param {string} [authenticationToken]
+		 * @param {string} [authenticationToken2]
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		listCommonFiles(options?: any): AxiosPromise<Array<FileModel>> {
-			return localVarFp.listCommonFiles(options).then((request) => request(axios, basePath));
+		getFileContent(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<string> {
+			return localVarFp.getFileContent(id, authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
 		},
 		/**
 		 * Get all files for the logged user
@@ -751,31 +956,19 @@ export const FilesApiFactory = function (configuration?: Configuration, basePath
 		 * @param {*} [options] Override http request option.
 		 * @throws {RequiredError}
 		 */
-		listUserFiles(authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<Array<FileModel>> {
-			return localVarFp.listUserFiles(authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
+		listFiles(authenticationToken?: string, authenticationToken2?: string, options?: any): AxiosPromise<Array<FileModel>> {
+			return localVarFp.listFiles(authenticationToken, authenticationToken2, options).then((request) => request(axios, basePath));
 		},
 	};
 };
 
 /**
- * FilesApi - object-oriented interface
+ * UserApi - object-oriented interface
  * @export
- * @class FilesApi
+ * @class UserApi
  * @extends {BaseAPI}
  */
-export class FilesApi extends BaseAPI {
-	/**
-	 *
-	 * @param {string} filename
-	 * @param {any} file
-	 * @param {*} [options] Override http request option.
-	 * @throws {RequiredError}
-	 * @memberof FilesApi
-	 */
-	public addCommonFile(filename: string, file: any, options?: any) {
-		return FilesApiFp(this.configuration).addCommonFile(filename, file, options).then((request) => request(this.axios, this.basePath));
-	}
-
+export class UserApi extends BaseAPI {
 	/**
 	 *
 	 * @param {string} filename
@@ -784,21 +977,10 @@ export class FilesApi extends BaseAPI {
 	 * @param {string} [authenticationToken2]
 	 * @param {*} [options] Override http request option.
 	 * @throws {RequiredError}
-	 * @memberof FilesApi
+	 * @memberof UserApi
 	 */
-	public addUserFile(filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options?: any) {
-		return FilesApiFp(this.configuration).addUserFile(filename, file, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
-	}
-
-	/**
-	 *
-	 * @param {string} id
-	 * @param {*} [options] Override http request option.
-	 * @throws {RequiredError}
-	 * @memberof FilesApi
-	 */
-	public deleteCommonFile(id: string, options?: any) {
-		return FilesApiFp(this.configuration).deleteCommonFile(id, options).then((request) => request(this.axios, this.basePath));
+	public addFile(filename: string, file: any, authenticationToken?: string, authenticationToken2?: string, options?: any) {
+		return UserApiFp(this.configuration).addFile(filename, file, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
 	}
 
 	/**
@@ -808,21 +990,10 @@ export class FilesApi extends BaseAPI {
 	 * @param {string} [authenticationToken2]
 	 * @param {*} [options] Override http request option.
 	 * @throws {RequiredError}
-	 * @memberof FilesApi
+	 * @memberof UserApi
 	 */
-	public deleteUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any) {
-		return FilesApiFp(this.configuration).deleteUserFile(id, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
-	}
-
-	/**
-	 * Get the content of a file without authentication
-	 * @param {string} id
-	 * @param {*} [options] Override http request option.
-	 * @throws {RequiredError}
-	 * @memberof FilesApi
-	 */
-	public getCommonFile(id: string, options?: any) {
-		return FilesApiFp(this.configuration).getCommonFile(id, options).then((request) => request(this.axios, this.basePath));
+	public deleteFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any) {
+		return UserApiFp(this.configuration).deleteFile(id, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
 	}
 
 	/**
@@ -832,20 +1003,23 @@ export class FilesApi extends BaseAPI {
 	 * @param {string} [authenticationToken2]
 	 * @param {*} [options] Override http request option.
 	 * @throws {RequiredError}
-	 * @memberof FilesApi
+	 * @memberof UserApi
 	 */
-	public getUserFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any) {
-		return FilesApiFp(this.configuration).getUserFile(id, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
+	public getFile(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any) {
+		return UserApiFp(this.configuration).getFile(id, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
 	}
 
 	/**
-	 * Get all common files name
+	 * Get the content of a file of the logged user
+	 * @param {string} id
+	 * @param {string} [authenticationToken]
+	 * @param {string} [authenticationToken2]
 	 * @param {*} [options] Override http request option.
 	 * @throws {RequiredError}
-	 * @memberof FilesApi
+	 * @memberof UserApi
 	 */
-	public listCommonFiles(options?: any) {
-		return FilesApiFp(this.configuration).listCommonFiles(options).then((request) => request(this.axios, this.basePath));
+	public getFileContent(id: string, authenticationToken?: string, authenticationToken2?: string, options?: any) {
+		return UserApiFp(this.configuration).getFileContent(id, authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
 	}
 
 	/**
@@ -854,10 +1028,10 @@ export class FilesApi extends BaseAPI {
 	 * @param {string} [authenticationToken2]
 	 * @param {*} [options] Override http request option.
 	 * @throws {RequiredError}
-	 * @memberof FilesApi
+	 * @memberof UserApi
 	 */
-	public listUserFiles(authenticationToken?: string, authenticationToken2?: string, options?: any) {
-		return FilesApiFp(this.configuration).listUserFiles(authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
+	public listFiles(authenticationToken?: string, authenticationToken2?: string, options?: any) {
+		return UserApiFp(this.configuration).listFiles(authenticationToken, authenticationToken2, options).then((request) => request(this.axios, this.basePath));
 	}
 }
 

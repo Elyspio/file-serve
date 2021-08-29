@@ -1,5 +1,5 @@
 import {injectable} from "inversify";
-import {FilesApi} from "./generated"
+import {PublicApi, UserApi} from "./generated"
 import axios from "axios";
 
 const instance = axios.create({
@@ -11,7 +11,10 @@ const instance = axios.create({
 export class BackendApi {
 
 	public readonly clients = {
-		files: new FilesApi(undefined, window.config.endpoints.core, instance),
+		files: {
+			user: new UserApi(undefined, window.config.endpoints.core, instance),
+			public: new PublicApi(undefined, window.config.endpoints.core, instance),
+		}
 	}
 
 }
