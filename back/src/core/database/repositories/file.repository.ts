@@ -39,9 +39,12 @@ export class FileRepository implements AfterRoutesInit {
 
 
 	@Log(FileRepository.log, {level: "debug", arguments: true})
-	async findById(id: string): Promise<File | undefined> {
+	async findById(username: string, id: string): Promise<File | undefined> {
 		const user = (await this.repo.findOne({
 				where: {
+					username: {
+						$eq: username
+					},
 					"files.id": {$eq: id}
 				}
 			}
@@ -51,7 +54,7 @@ export class FileRepository implements AfterRoutesInit {
 
 
 	@Log(FileRepository.log, {level: "debug", arguments: true})
-	async delete(id: string) {
+	async delete(username: string, id: string) {
 		const user = (await this.repo.findOne({
 				where: {
 					"files.id": {$eq: id}
@@ -73,8 +76,8 @@ export class FileRepository implements AfterRoutesInit {
 	}
 
 	@Log(FileRepository.log, {level: "debug", arguments: true})
-	async exist(id: string) {
-		return (await this.findById(id)) !== undefined
+	async exist(username: string, id: string) {
+		return (await this.findById(username, id)) !== undefined
 	}
 
 

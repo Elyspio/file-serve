@@ -25,15 +25,28 @@ export class FileService {
 
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async getCommonFile(id: string) {
-		return this.getFileContent(id);
+		return this.getFile(this.commonUsername, id);
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: true})
-	async getFileContent(id: string) {
-		const file = await this.repositories.files.findById(id);
+	async getFile(username: string, id: string) {
+		const file = await this.repositories.files.findById(username, id);
 		if (!file) throw FileService.exceptions.fileNotFound
 		return file;
 	}
+
+	@Log(FileService.log, {level: "debug", arguments: true})
+	async getCommonFileContent(id: string) {
+		return this.getFileContent(id, this.commonUsername);
+	}
+
+	@Log(FileService.log, {level: "debug", arguments: true})
+	async getFileContent(id: string, username: string) {
+		const file = await this.repositories.files.findById(username, id);
+		if (!file) throw FileService.exceptions.fileNotFound
+		return Buffer.from(file.content, "base64").toString("utf8");
+	}
+
 
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async listCommonFiles() {
@@ -59,12 +72,12 @@ export class FileService {
 
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async deleteCommonFile(id: string) {
-		return this.deleteFile(id);
+		return this.deleteFile(this.commonUsername, id);
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: true})
-	async deleteFile(id: string) {
-		await this.repositories.files.delete(id);
+	async deleteFile(username: string, id: string) {
+		await this.repositories.files.delete(username, id);
 	}
 
 	private async ensureUserExist(username: string) {
