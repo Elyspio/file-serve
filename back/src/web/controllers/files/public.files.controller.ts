@@ -7,6 +7,7 @@ import {FileService} from "../../../core/services/file.service";
 import {NotFound} from "@tsed/exceptions";
 import {InternalServerError} from "@tsed/exceptions/lib/serverErrors";
 import {FileModel, FileModelWithContent} from "./file.model";
+import {Protected} from "../../decorators/protected";
 
 @Controller("/files/public")
 @Name("Public")
@@ -70,6 +71,7 @@ export class PublicFilesController {
 	@Returns(201, Number).ContentType("text/plain")
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
+	@Protected()
 	async addFile(
 		@PathParams("filename") filename: string,
 		@Required() @MultipartFile("file") file: PlatformMulterFile
@@ -85,6 +87,7 @@ export class PublicFilesController {
 	@Returns(204)
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
+	@Protected()
 	async deleteFile(
 		@PathParams("id") id: string
 	) {
