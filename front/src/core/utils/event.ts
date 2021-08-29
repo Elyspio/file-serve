@@ -12,7 +12,6 @@ export class EventManager<T extends Event = {}> {
 	}
 
 	public emit<event extends keyof T>(evt: event, ...params: Parameters<T[event]>) {
-		console.log("EventManager emit", evt)
 		this.base.emit(evt as string, params);
 	}
 }
