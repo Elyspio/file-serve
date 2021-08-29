@@ -1,7 +1,6 @@
 import {Box, Button, Container, Grid, IconButton, Paper} from "@material-ui/core";
 import "./Files.scss"
 import * as React from 'react';
-import {Dispatch, SetStateAction} from 'react';
 import {FilesService} from "../../../core/services/files.service";
 import {useInjection} from "inversify-react";
 import {DiKeysService} from "../../../core/di/di.keys.service";
@@ -13,14 +12,8 @@ import {Title} from "../utils/title";
 import {push} from "connected-react-router";
 import {routes} from "../../../config/routes";
 import {login} from "../../../store/module/authentication/authentication.action";
+import {AuthenticationEvents} from "../../../core/services/authentication.service";
 
-
-function parseHook<S>(arg: [S, Dispatch<SetStateAction<S>>]) {
-	return {
-		get: arg[0],
-		set: arg[1]
-	}
-}
 
 export const Files = () => {
 
@@ -30,15 +23,9 @@ export const Files = () => {
 
 	const logged = useAppSelector(s => s.authentication.logged);
 
-	const common = {
-		...useAsyncState(services.files.list.common, []),
-		showActions: parseHook(React.useState(false)),
-	}
+	const common = useAsyncState(services.files.public.list, [])
 
-	const user = {
-		...useAsyncState(services.files.list.user, []),
-		showActions: parseHook(React.useState(false)),
-	}
+	const {data: userData, reload: userReload} = useAsyncState(services.files.user.list, [])
 
 	const dispatch = useAppDispatch();
 
@@ -48,11 +35,20 @@ export const Files = () => {
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
 
+	React.useEffect(() => {
+		AuthenticationEvents.on("login", () => {
+			return userReload()
+		})
+	}, [userReload])
+
 
 	return (
 		<Container className={"Files"}>
 			<Grid container spacing={4} direction={"row"}>
-				<Grid item xs={6}>
+				<Grid
+					item
+					xs={6}
+				>
 					<Paper>
 						<Box
 							display={"flex"}
@@ -68,8 +64,7 @@ export const Files = () => {
 								alignItems={"center"}
 								justifyContent={"space-between"}
 								width={"100%"}
-								onMouseOver={() => common.showActions.set(true)}
-								onMouseOut={() => common.showActions.set(false)}
+
 							>
 								<Title>Common files</Title>
 								<div className={"actions"}>
@@ -87,9 +82,17 @@ export const Files = () => {
 				</Grid>
 
 
-				<Grid item xs={6}>
+				<Grid
+					item
+					xs={6}
+				>
 					<Paper>
-						<Box width={"100%"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+						<Box
+							width={"100%"}
+							flexDirection={"column"}
+							alignItems={"center"}
+							justifyContent={"center"}
+						>
 							{logged
 								? <Box
 									display={"flex"}
@@ -105,17 +108,15 @@ export const Files = () => {
 										alignItems={"center"}
 										justifyContent={"space-between"}
 										width={"100%"}
-										onMouseOver={() => user.showActions.set(true)}
-										onMouseOut={() => user.showActions.set(false)}
 									>
 										<Title>Your's files</Title>
 										<div className={"actions"}>
-											<IconButton onClick={user.reload}><Replay/></IconButton>
+											<IconButton onClick={userReload}><Replay/></IconButton>
 											<IconButton onClick={addFile(true)}><AddCircle/></IconButton>
 										</div>
 									</Box>
 									<Grid container direction={"column"}>
-										{user.data.map(file => <Grid item key={file.id}>
+										{userData.map(file => <Grid item key={file.id}>
 											<File data={file} user={true}/>
 										</Grid>)}
 									</Grid>

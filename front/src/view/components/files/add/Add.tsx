@@ -13,7 +13,7 @@ import {useHistory} from 'react-router-dom';
 
 const fileTypes = {
 	user: "user",
-	common: "common"
+	public: "public"
 } as const
 
 export function Add() {
@@ -28,14 +28,14 @@ export function Add() {
 	const dispatch = useAppDispatch();
 
 	const {location: {state}} = useHistory<{ user: boolean }>();
-	// const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(user ? "user": "common");
-	const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(state?.user ? "user" : "common");
+	// const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(user ? "user": "public");
+	const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(state?.user ? "user" : "public");
 	const [files, setFile] = React.useState<FileList | null>(null)
 	const [filename, setFilename] = React.useState("")
 
 	const create = React.useCallback(async () => {
 		if (files !== null && files.length > 0) {
-			await services.files.add[fileType](filename, files[0])
+			await services.files[fileType].add(filename, files[0])
 			dispatch(push(routes.home))
 		}
 	}, [dispatch, fileType, services.files, filename, files])
@@ -76,7 +76,7 @@ export function Add() {
 							fullWidth
 							onChange={(e) => setFileType(e.target.value as any)}
 						>
-							<MenuItem value={fileTypes.common}>Everyone</MenuItem>
+							<MenuItem value={fileTypes.public}>Everyone</MenuItem>
 							<MenuItem value={fileTypes.user}>Only me</MenuItem>
 						</Select>
 					</FormControl>

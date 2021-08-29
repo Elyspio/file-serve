@@ -23,50 +23,53 @@ function download({name, mime, content}: FileModelWithContent) {
 @injectable()
 export class FilesService {
 
-	public download = {
-		common: async (id: FileModel["id"]) => {
-			const file = await this.get.common(id);
-			await download(file);
-		},
-		user: async (id: FileModel["id"]) => {
-			const file = await this.get.user(id);
-			await download(file);
-		}
-	}
+
 	@inject(DiKeysApi.backend)
 	private backendApi!: BackendApi
-	public list = {
-		common: () => {
-			return this.backendApi.clients.files.listCommonFiles().then(x => x.data);
+
+
+	public public = {
+		add: (filename: string, file: any) => {
+			return this.backendApi.clients.files.public.addFile(filename, file).then(x => x.data);
 		},
-		user: () => {
-			return this.backendApi.clients.files.listUserFiles().then(x => x.data);
-		}
-	}
-	public get = {
-		common: (id: FileModel["id"]) => {
-			return this.backendApi.clients.files.getCommonFile(id).then(x => x.data);
+		delete: (id: FileModel["id"]) => {
+			return this.backendApi.clients.files.public.deleteFile(id).then(x => x.data);
 		},
-		user: (id: FileModel["id"]) => {
-			return this.backendApi.clients.files.getUserFile(id).then(x => x.data);
-		}
-	}
-	public delete = {
-		common: (id: FileModel["id"]) => {
-			return this.backendApi.clients.files.deleteCommonFile(id).then(x => x.data);
+		list: () => {
+			return this.backendApi.clients.files.public.listFiles().then(x => x.data);
 		},
-		user: (id: FileModel["id"]) => {
-			return this.backendApi.clients.files.deleteUserFile(id).then(x => x.data);
-		}
+		download: async (id: FileModel["id"]) => {
+			const file = await this.public.get(id);
+			await download(file);
+		},
+		get: (id: FileModel["id"]) => {
+			return this.backendApi.clients.files.public.getFile(id).then(x => x.data);
+		},
+		getContent: (id: FileModel["id"]) => {
+			return this.backendApi.clients.files.public.getFileContent(id).then(x => x.data);
+		},
 	}
 
-	public add = {
-		common: (filename: string, file: any) => {
-			return this.backendApi.clients.files.addCommonFile(filename, file).then(x => x.data);
+	public user = {
+		add: (filename: string, file: any) => {
+			return this.backendApi.clients.files.user.addFile(filename, file).then(x => x.data);
 		},
-		user: (filename: string, file: any) => {
-			return this.backendApi.clients.files.addUserFile(filename, file).then(x => x.data);
-		}
+		delete: (id: FileModel["id"]) => {
+			return this.backendApi.clients.files.user.deleteFile(id).then(x => x.data);
+		},
+		list: () => {
+			return this.backendApi.clients.files.user.listFiles().then(x => x.data);
+		},
+		download: async (id: FileModel["id"]) => {
+			const file = await this.user.get(id);
+			await download(file);
+		},
+		get: (id: FileModel["id"]) => {
+			return this.backendApi.clients.files.user.getFile(id).then(x => x.data);
+		},
+		getContent: (id: FileModel["id"]) => {
+			return this.backendApi.clients.files.user.getFileContent(id).then(x => x.data);
+		},
 	}
 
 

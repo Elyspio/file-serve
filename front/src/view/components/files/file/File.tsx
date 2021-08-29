@@ -24,23 +24,21 @@ export function File({data: {id, name}, user}: FileProps) {
 		files: useInjection<FilesService>(DiKeysService.files)
 	}
 
+	const funcs = React.useMemo(() => services.files[user ? "user" : "public"], [services.files, user])
+
 	const download = useCallback(() => {
-		const func = user ? services.files.download.user : services.files.download.common;
-		return func(id);
-	}, [services.files, user, id])
+		return funcs.download(id);
+	}, [funcs, id])
 
 	const del = useCallback(() => {
-		const func = user ? services.files.delete.user : services.files.delete.common;
-		return func(id);
-	}, [services.files, user, id])
+		return funcs.delete(id);
+	}, [funcs, id])
 
 	const view = useCallback(async (e) => {
-		const func = user ? services.files.get.user : services.files.get.common;
-		const file = await func(id);
-		const content = Buffer.from(file.content, "base64").toString("utf-8")
+		const content = await funcs.getContent(id);
 		setOpen(e);
 		setPreviewContent(content);
-	}, [services.files, user, id, setOpen])
+	}, [funcs, id, setOpen])
 
 
 	const colors = useAppSelector(s => {
@@ -85,7 +83,7 @@ export function File({data: {id, name}, user}: FileProps) {
 					{name}
 				</DialogTitle>
 				<DialogContent dividers style={{width: "50vw"}}>
-					<Typography color={"textSecondary"}>
+					<Typography color={"textSecondary"} component={"div"}>
 						<pre>
 							{previewContent}
 						</pre>
