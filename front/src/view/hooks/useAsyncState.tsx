@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 
 
 type UseAsyncStateFuncParams<T> = () => Promise<T>;
@@ -7,7 +7,7 @@ export function useAsyncState<T>(func: UseAsyncStateFuncParams<T>, defaultValue:
 
 	const [data, setData] = useState<T>(defaultValue);
 	const [state, setState] = useState<"pending" | "success" | "error">("pending")
-	const handle = async (func: UseAsyncStateFuncParams<T>) => {
+	const handle = useCallback(async (func: UseAsyncStateFuncParams<T>) => {
 		setState("pending")
 		try {
 			const out = await func()
@@ -16,7 +16,7 @@ export function useAsyncState<T>(func: UseAsyncStateFuncParams<T>, defaultValue:
 		} catch (e) {
 			setState("error")
 		}
-	}
+	}, [])
 
 	useEffect(() => {
 		handle(func);
@@ -31,15 +31,14 @@ export function useAsyncState<T>(func: UseAsyncStateFuncParams<T>, defaultValue:
 			timer && clearInterval(timer);
 		}
 
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [func])
+	}, [func, replay, handle])
 
+
+	const reload = useCallback(() => handle(func), [handle, func])
 
 	return {
-		data: data,
+		data,
 		state,
-		reload: () => handle(func),
+		reload,
 	}
-
-
 }
