@@ -4,7 +4,7 @@ import {Log} from "../../../core/utils/decorators/logger";
 import {getLogger} from "../../../core/utils/logger";
 import {Inject} from "@tsed/di";
 import {FileService} from "../../../core/services/file.service";
-import {NotFound} from "@tsed/exceptions";
+import {NotFound, Unauthorized} from "@tsed/exceptions";
 import {InternalServerError} from "@tsed/exceptions/lib/serverErrors";
 import {Request} from "express";
 import {Protected} from "../../decorators/protected";
@@ -34,13 +34,14 @@ export class UserFilesController {
 		}
 	}
 
-	@Get("/:id/content")
-	@Returns(200, String)
+
+	@Get("/:id")
+	@Returns(200, FileModelWithContent)
 	@Returns(404, NotFound).Description("File not found")
 	@Log(UserFilesController.log)
 	@Description("Get the content of a file of the logged user")
 	@Protected()
-	async getFileContent(
+	async getFile(
 		@PathParams("id") id: string,
 		@Req() {auth}: Request
 	) {
@@ -59,13 +60,14 @@ export class UserFilesController {
 	}
 
 
-	@Get("/:id")
-	@Returns(200, FileModelWithContent)
-	@Returns(404, NotFound).Description("File not found")
+	@Get("/:id/content")
+	@Returns(200, String)
+	@Returns(NotFound.STATUS, NotFound).Description("File not found")
+	@Returns(Unauthorized.STATUS, Unauthorized).Description("File not found")
 	@Log(UserFilesController.log)
 	@Description("Get the content of a file of the logged user")
 	@Protected()
-	async getFile(
+	async getFileContent(
 		@PathParams("id") id: string,
 		@Req() {auth}: Request
 	) {
@@ -76,12 +78,13 @@ export class UserFilesController {
 				case FileService.exceptions.fileNotFound:
 					throw new NotFound("Could not find file specified")
 				case FileService.exceptions.notAuthorized:
-					throw new Forbidden("This is not your file !!!")
+					throw new Unauthorized("This is not your file !!!")
 				default:
 					throw new InternalServerError((e as Error).message)
 			}
 		}
 	}
+
 
 	@Post("/:filename")
 	@Returns(201, Number).ContentType("text/plain")

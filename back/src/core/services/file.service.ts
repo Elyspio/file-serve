@@ -37,11 +37,11 @@ export class FileService {
 
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async getCommonFileContent(id: string) {
-		return this.getFileContent(id, this.commonUsername);
+		return this.getFileContent(this.commonUsername,  id);
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: true})
-	async getFileContent(id: string, username: string) {
+	async getFileContent(username: string, id: string, ) {
 		const file = await this.repositories.files.findById(username, id);
 		if (!file) throw FileService.exceptions.fileNotFound
 		return Buffer.from(file.content, "base64").toString("utf8");
