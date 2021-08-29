@@ -22,9 +22,9 @@ function waitForLogin(page: Window) {
 		const clearInter = () => (interval !== undefined) && clearInterval(interval);
 		page.onclose = clearInter
 
-		const func = async () => {
+		const func = () => {
 			console.debug("Checking if user is logged from local storage")
-			const isPresent = localStorages.validation.retrieve(undefined) !== undefined;
+			let isPresent = localStorages.validation.retrieve(undefined) !== undefined;
 			if (isPresent) {
 				localStorages.validation.remove()
 				clearInter();
@@ -35,8 +35,10 @@ function waitForLogin(page: Window) {
 			return false;
 		}
 
-		if (!(await func())) {
-			interval = setInterval(func, 10);
+		if (!(func())) {
+			interval = setInterval(() => {
+				func()
+			}, 250);
 		}
 	})
 
@@ -54,6 +56,18 @@ export const login = createAsyncThunk("authentication/login", async (_, {getStat
 			toast.update(toastId, {render: "Connected", autoClose: 5000, type: "success"})
 		} else {
 			throw new Error("An error occurred while opening the login page")
+		}
+	} else {
+		console.info("You are already logged");
+		return {username, credentials, settings}
+	}
+})
+
+export const silentLogin = createAsyncThunk("authentication/silentLogin", async (_, {getState, dispatch}) => {
+	const {logged, username, credentials, settings} = (getState() as StoreState).authentication
+	if (!logged || username === undefined || credentials === undefined) {
+		if (await authentication.isLogged()) {
+			dispatch(getUserInfos());
 		}
 	} else {
 		console.info("You are already logged");

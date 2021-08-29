@@ -9,7 +9,7 @@ import {toggleTheme} from "../../store/module/theme/theme.action";
 import {createDrawerAction, withDrawer} from "./utils/drawer/Drawer.hoc";
 import {Box} from "@material-ui/core";
 import {ReactComponent as Logout} from "../icons/logout.svg"
-import {login, logout} from "../../store/module/authentication/authentication.action";
+import {login, logout, silentLogin} from "../../store/module/authentication/authentication.action";
 import {updateToastTheme} from "./utils/toast";
 import {Route, Switch as SwitchRouter} from 'react-router'
 import {Routes, routes} from "../../config/routes";
@@ -70,6 +70,11 @@ function Application() {
 			onClick: () => dispatch(push(routes.addFile))
 		}))
 	}
+
+	React.useEffect(() => {
+		dispatch(silentLogin());
+	}, [dispatch])
+
 
 	const drawer = withDrawer({
 		component: <SwitchRouter>
