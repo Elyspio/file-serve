@@ -13,7 +13,7 @@ import {login, logout, silentLogin} from "../../store/module/authentication/auth
 import {updateToastTheme} from "./utils/toast";
 import {Route, Switch as SwitchRouter} from 'react-router'
 import {Routes, routes} from "../../config/routes";
-import {Add} from "./files/add/Add";
+import {AddFile} from "./files/add/AddFile";
 import {AddCircle, Home} from "@material-ui/icons";
 import {push} from "connected-react-router";
 
@@ -79,7 +79,7 @@ function Application() {
 	const drawer = withDrawer({
 		component: <SwitchRouter>
 			<Route exact path={routes.home} component={Files}/>
-			<Route exact path={routes.addFile} component={Add}/>
+			<Route exact path={routes.addFile} component={AddFile}/>
 		</SwitchRouter>,
 		actions,
 		title: "Files"

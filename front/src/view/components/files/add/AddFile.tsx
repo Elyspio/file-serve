@@ -1,7 +1,6 @@
 import React from 'react';
 import {Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField} from "@material-ui/core";
 import {Title} from "../../utils/title";
-import "./Add.scss"
 import {useInjection} from "inversify-react";
 import {FilesService} from "../../../../core/services/files.service";
 import {DiKeysService} from "../../../../core/di/di.keys.service";
@@ -16,7 +15,7 @@ const fileTypes = {
 	public: "public"
 } as const
 
-export function Add() {
+export function AddFile() {
 
 	const services = {
 		files: useInjection<FilesService>(DiKeysService.files)

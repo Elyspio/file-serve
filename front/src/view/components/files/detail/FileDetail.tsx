@@ -15,7 +15,7 @@ type FileProps = {
 	user?: boolean
 }
 
-export function File({data: {id, name}, user}: FileProps) {
+export function FileDetail({data: {id, name}, user}: FileProps) {
 
 	const [previewContent, setPreviewContent] = useState("")
 	const {setOpen, open, setClose} = useModal(false)
@@ -58,7 +58,7 @@ export function File({data: {id, name}, user}: FileProps) {
 
 	return (
 
-		<Grid className={"File"} container alignItems={"center"} justifyContent={"space-between"}>
+		<Grid className={"FileDetail"} container alignItems={"center"} justifyContent={"space-between"}>
 			<Grid item xs={6}>
 				<Typography color={"textPrimary"}>{name}</Typography>
 			</Grid>

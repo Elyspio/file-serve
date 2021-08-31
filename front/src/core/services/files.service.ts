@@ -25,9 +25,24 @@ function download({name, mime, content}: FileModelWithContent) {
 export class FilesService {
 
 
+	public public = {
+		add: this.addPublic.bind(this),
+		download: this.downloadPublic.bind(this),
+		delete: this.deletePublic.bind(this),
+		getContent: this.getContentPublic.bind(this),
+		list: this.listPublic.bind(this),
+		get: this.getPublic
+	}
+	public user = {
+		add: this.addUser.bind(this),
+		download: this.downloadUser.bind(this),
+		delete: this.deleteUser.bind(this),
+		getContent: this.getContentUser.bind(this),
+		list: this.listUser.bind(this),
+		get: this.getUser.bind(this)
+	}
 	@inject(DiKeysApi.backend)
 	private backendApi!: BackendApi
-
 
 	@ToastOn({error: "Could not add the public file"}, {concatArgs: ["filename"]})
 	private async addPublic(filename: string, file: any) {
@@ -90,25 +105,6 @@ export class FilesService {
 	private async getContentUser(id: FileModel["id"]) {
 		return this.backendApi.clients.files.user.getFileContent(id).then(x => x.data);
 	}
-
-
-	public public = {
-		add: this.addPublic.bind(this),
-		download: this.downloadPublic.bind(this),
-		delete: this.deletePublic.bind(this),
-		getContent: this.getContentPublic.bind(this),
-		list: this.listPublic.bind(this),
-		get: this.getPublic
-	}
-	public user = {
-		add: this.addUser.bind(this),
-		download: this.downloadUser.bind(this),
-		delete: this.deleteUser.bind(this),
-		getContent: this.getContentUser.bind(this),
-		list: this.listUser.bind(this),
-		get: this.getUser.bind(this)
-	}
-
 
 
 }

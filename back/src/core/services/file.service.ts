@@ -37,11 +37,11 @@ export class FileService {
 
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async getCommonFileContent(id: string) {
-		return this.getFileContent(this.commonUsername,  id);
+		return this.getFileContent(this.commonUsername, id);
 	}
 
 	@Log(FileService.log, {level: "debug", arguments: true})
-	async getFileContent(username: string, id: string, ) {
+	async getFileContent(username: string, id: string,) {
 		const file = await this.repositories.files.findById(username, id);
 		if (!file) throw FileService.exceptions.fileNotFound
 		return Buffer.from(file.content, "base64").toString("utf8");
@@ -55,6 +55,7 @@ export class FileService {
 
 	@Log(FileService.log, {level: "debug", arguments: true})
 	async listFiles(username: string) {
+		await this.ensureUserExist(username);
 		return (await this.repositories.files.find(username))
 			.map(file => ({name: file.name, id: file.id, mime: file.mime}));
 	}

@@ -4,6 +4,11 @@ import {ThemeState} from "../../../store/module/theme/theme.reducer";
 export function updateToastTheme(theme: ThemeState["current"]) {
 	const {palette} = getCurrentTheme(theme);
 	const css = `
+	
+	.Toastify__toast-body {
+		white-space: pre-line;
+	}
+	
     .Toastify__toast--default {
         background-color: ${palette.background.default}
     }

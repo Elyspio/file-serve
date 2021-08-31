@@ -5,7 +5,7 @@ import {FilesService} from "../../../core/services/files.service";
 import {useInjection} from "inversify-react";
 import {DiKeysService} from "../../../core/di/di.keys.service";
 import {useAsyncState} from "../../hooks/useAsyncState";
-import {File} from "./file/File";
+import {FileDetail} from "./detail/FileDetail";
 import {useAppDispatch, useAppSelector} from "../../../store";
 import {AddCircle, Replay} from "@material-ui/icons";
 import {Title} from "../utils/title";
@@ -25,7 +25,20 @@ export const Files = () => {
 
 	const common = useAsyncState(services.files.public.list, [])
 
-	const {data: userData, reload: userReload} = useAsyncState(services.files.user.list, [])
+	const getUserData = React.useCallback(() => {
+		if (logged) return services.files.user.list();
+		return Promise.resolve([])
+	}, [logged, services.files.user])
+
+	const {data: userData, reload: userReload} = useAsyncState(getUserData, [])
+
+	React.useEffect(() => {
+		AuthenticationEvents.on("login", () => {
+			return userReload()
+		})
+	}, [userReload])
+
+	// region callbacks
 
 	const dispatch = useAppDispatch();
 
@@ -35,12 +48,7 @@ export const Files = () => {
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
 
-	React.useEffect(() => {
-		AuthenticationEvents.on("login", () => {
-			return userReload()
-		})
-	}, [userReload])
-
+	// endregion
 
 	return (
 		<Container className={"Files"}>
@@ -75,7 +83,7 @@ export const Files = () => {
 							</Box>
 							<Grid container direction={"column"} spacing={2}>
 								{common.data.map(file => <Grid item key={file.id}>
-									<File data={file} user={false}/>
+									<FileDetail data={file} user={false}/>
 								</Grid>)}
 							</Grid>
 						</Box>
@@ -119,7 +127,7 @@ export const Files = () => {
 									</Box>
 									<Grid container direction={"column"}>
 										{userData.map(file => <Grid item key={file.id}>
-											<File data={file} user={true}/>
+											<FileDetail data={file} user={true}/>
 										</Grid>)}
 									</Grid>
 								</Box>

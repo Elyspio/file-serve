@@ -17,7 +17,7 @@ export class FileRepository implements AfterRoutesInit {
 	}
 
 	$afterRoutesInit() {
-		const connection = this.typeORMService.get("postgres")!; // get connection by name
+		const connection = this.typeORMService.get("db")!; // get connection by name
 		this.repo = connection.getMongoRepository(UserEntity);
 	}
 
