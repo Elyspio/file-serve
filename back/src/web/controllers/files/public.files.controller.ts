@@ -50,7 +50,7 @@ export class PublicFilesController {
 
 
 	@Get("/:id/content")
-	@Returns(200, String)
+	@Returns(200, String).ContentType("text/plain")
 	@Returns(404, NotFound).Description("File not found")
 	@Returns(500, InternalServerError).Description("Unexpected error")
 	@Description("Get the content of a file without authentication")

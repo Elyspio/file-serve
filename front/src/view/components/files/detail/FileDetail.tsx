@@ -20,6 +20,9 @@ export function FileDetail({data: {id, name}, user}: FileProps) {
 	const [previewContent, setPreviewContent] = useState("")
 	const {setOpen, open, setClose} = useModal(false)
 
+
+	const logged = useAppSelector(s => s.authentication.logged);
+
 	const services = {
 		files: useInjection<FilesService>(DiKeysService.files)
 	}
@@ -72,9 +75,10 @@ export function FileDetail({data: {id, name}, user}: FileProps) {
 					<IconButton title={"Download file"} onClick={download}><GetApp style={{fill: colors.download}}/></IconButton>
 				</Grid>
 
-				<Grid item>
-					<IconButton title={"Delete file"} onClick={del}><Close style={{fill: colors.del}}/></IconButton>
-				</Grid>
+				{logged && <Grid item>
+                    <IconButton title={"Delete file"} onClick={del}><Close style={{fill: colors.del}}/></IconButton>
+                </Grid>}
+
 			</Grid>
 
 

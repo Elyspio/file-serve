@@ -61,7 +61,7 @@ export class UserFilesController {
 
 
 	@Get("/:id/content")
-	@Returns(200, String)
+	@Returns(200, String).ContentType("text/plain")
 	@Returns(NotFound.STATUS, NotFound).Description("File not found")
 	@Returns(Unauthorized.STATUS, Unauthorized).Description("File not found")
 	@Log(UserFilesController.log)

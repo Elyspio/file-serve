@@ -21,9 +21,14 @@ function download({name, mime, content}: FileModelWithContent) {
 }
 
 
+function stringify(arg: string | object) {
+	if (typeof arg === "string") return arg;
+	else return JSON.stringify(arg, null, 4)
+}
+
+
 @injectable()
 export class FilesService {
-
 
 	public public = {
 		add: this.addPublic.bind(this),
@@ -31,7 +36,7 @@ export class FilesService {
 		delete: this.deletePublic.bind(this),
 		getContent: this.getContentPublic.bind(this),
 		list: this.listPublic.bind(this),
-		get: this.getPublic
+		get: this.getPublic.bind(this)
 	}
 	public user = {
 		add: this.addUser.bind(this),
@@ -72,7 +77,7 @@ export class FilesService {
 
 	@ToastOn({error: "Could not retrieve the public file content"}, {concatArgs: true})
 	private async getContentPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.getFileContent(id).then(x => x.data);
+		return this.backendApi.clients.files.public.getFileContent(id).then(x => stringify(x.data));
 	}
 
 	@ToastOn({error: "Could not add your file"}, {concatArgs: ["filename"]})
@@ -103,7 +108,7 @@ export class FilesService {
 
 	@ToastOn({error: "Could not retrieve your file content"}, {concatArgs: true})
 	private async getContentUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.getFileContent(id).then(x => x.data);
+		return this.backendApi.clients.files.user.getFileContent(id).then(x => stringify(x.data));
 	}
 
 

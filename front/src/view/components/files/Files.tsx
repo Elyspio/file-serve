@@ -1,4 +1,4 @@
-import {Box, Button, Container, Grid, IconButton, Paper} from "@material-ui/core";
+import {Box, Button, Container, Divider, Grid, IconButton, Paper} from "@material-ui/core";
 import "./Files.scss"
 import * as React from 'react';
 import {FilesService} from "../../../core/services/files.service";
@@ -13,6 +13,7 @@ import {push} from "connected-react-router";
 import {routes} from "../../../config/routes";
 import {login} from "../../../store/module/authentication/authentication.action";
 import {AuthenticationEvents} from "../../../core/services/authentication.service";
+import {FileModel} from "../../../core/apis/backend/generated";
 
 
 export const Files = () => {
@@ -58,85 +59,32 @@ export const Files = () => {
 					xs={6}
 				>
 					<Paper>
-						<Box
-							className={"files-container"}
-							display={"flex"}
-							flexDirection={"column"}
-							alignItems={"center"}
-							justifyContent={"center"}
-							px={2}
-
-						>
-							<Box
-								className={"file-header"}
-								display={"flex"}
-								alignItems={"center"}
-								justifyContent={"space-between"}
-								width={"100%"}
-
-							>
-								<Title>Common files</Title>
-								<div className={"actions"}>
-									<IconButton onClick={common.reload}><Replay/></IconButton>
-									<IconButton onClick={addFile(false)}><AddCircle/></IconButton>
-								</div>
-							</Box>
-							<Grid container direction={"column"} spacing={2}>
-								{common.data.map(file => <Grid item key={file.id}>
-									<FileDetail data={file} user={false}/>
-								</Grid>)}
-							</Grid>
-						</Box>
+						<FileContainer
+							user={false}
+							title={"Public files"}
+							add={addFile(false)}
+							data={common.data}
+							reload={common.reload}
+						/>
 					</Paper>
 				</Grid>
-
 
 				<Grid
 					item
 					xs={6}
 				>
 					<Paper>
-						<Box
-							width={"100%"}
-							flexDirection={"column"}
-							alignItems={"center"}
-							className={"files-container"}
-							justifyContent={"center"}
-						>
-							{logged
-								? <Box
-									display={"flex"}
-									flexDirection={"column"}
-									alignItems={"center"}
-									justifyContent={"center"}
-									px={2}
-
-								>
-									<Box
-										className={"file-header"}
-										display={"flex"}
-										alignItems={"center"}
-										justifyContent={"space-between"}
-										width={"100%"}
-									>
-										<Title>Your's files</Title>
-										<div className={"actions"}>
-											<IconButton onClick={userReload}><Replay/></IconButton>
-											<IconButton onClick={addFile(true)}><AddCircle/></IconButton>
-										</div>
-									</Box>
-									<Grid container direction={"column"}>
-										{userData.map(file => <Grid item key={file.id}>
-											<FileDetail data={file} user={true}/>
-										</Grid>)}
-									</Grid>
-								</Box>
-
-								: <Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
-									<Button onClick={redirectToLogin}>Login to see your files</Button>
-								</Box>
-							}
-						</Box>
+						{logged
+							? <FileContainer
+								user={true}
+								title={"Your files"}
+								add={addFile(true)}
+								data={userData}
+								reload={userReload}
+							/>
+							: <Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
+								<Button onClick={redirectToLogin}>Login to see your files</Button>
+							</Box>}
 					</Paper>
 				</Grid>
 
@@ -144,6 +92,58 @@ export const Files = () => {
 		</Container>
 	);
 
+}
+
+type FileContainerProps = {
+	data: FileModel[],
+	reload: () => any,
+	add: () => any,
+	user: boolean,
+	title: string
+}
+
+function FileContainer({add, reload, data, user, title}: FileContainerProps) {
+
+	const logged = useAppSelector(s => s.authentication.logged);
+
+	return <Box
+		width={"100%"}
+		flexDirection={"column"}
+		alignItems={"center"}
+		className={"files-container"}
+		justifyContent={"center"}
+	>
+		<Box
+			display={"flex"}
+			flexDirection={"column"}
+			alignItems={"center"}
+			justifyContent={"center"}
+			px={2}
+
+		>
+			<Box
+				className={"file-header"}
+				display={"flex"}
+				alignItems={"center"}
+				justifyContent={"space-between"}
+				width={"100%"}
+			>
+				<Title>{title}</Title>
+				<div className={"actions"}>
+					<IconButton onClick={reload}><Replay/></IconButton>
+					{logged && <IconButton onClick={add}><AddCircle/></IconButton>}
+				</div>
+			</Box>
+			{data.length > 0 && <Grid container direction={"column"} spacing={2}>
+                <Box marginTop={2}><Divider/></Box>
+				{data.map(file => <Grid item key={file.id}>
+					<FileDetail data={file} user={user}/>
+				</Grid>)}
+            </Grid>}
+		</Box>
+
+
+	</Box>
 }
 
 

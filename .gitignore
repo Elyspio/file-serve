@@ -1,7 +1,8 @@
 */node_modules
 */build
 *.map
-*.js
+
 .idea
 
 deploy/dev/data
+deploy/prod/config/front/conf.js
