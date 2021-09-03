@@ -6,19 +6,7 @@ type Props = {
 }
 
 
-const getRealType = (str: string): "string" | "number" | "boolean" | "null" => {
-	try {
-		const x = JSON.parse(str);
-		if (x === null) return "null"
-		if (typeof x === "boolean") return "boolean"
-		if (typeof x === "number") return "number";
-		return "string"
-	} catch (e) {
-		return "string"
-	}
-}
-
-function JsonViewer({data}: Props) {
+export function JsonViewer({data}: Props) {
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -29,7 +17,7 @@ function JsonViewer({data}: Props) {
 			lines = lines.map(str => {
 				let old = str;
 				let altered = false;
-				str = str.replace(/( [{}\[\]],?$)/g, "<span class='object'>$1</span>")
+				str = str.replace(/( [{}[]],?$)/g, "<span class='object'>$1</span>")
 				if (old !== str) {
 					altered = true;
 					old = str;
@@ -98,40 +86,8 @@ function JsonViewer({data}: Props) {
 			ref.current.innerHTML = `<pre>${lines.join("\n")}</pre>`
 		}
 
-	}, [ref])
-
-	// const ret = React.useMemo(() => {
-	//
-	// 	const str = JSON.stringify(data, null, 4);
-	// 	str.replace(/{/g, "<span class='object'>{</span>")
-	// 	str.replace(/}/g, "<span class='object'>}</span>")
-	//
-	//
-	// 	let lines = JSON.stringify(data, null, 4).split("\n");
-	//
-	// 	return lines.map((line, index) => {
-	// 		const result = /(.*)(".*"):(.*)/g.exec(line);
-	// 		if (result?.length === 4) {
-	// 			const [,spaces, key, value] = result;
-	// 			const classname = getRealType(value);
-	// 			return <Typography color={"textSecondary"} key={index} component={"pre"} is={"pre"}>
-	// 				{spaces}<span className={"key"}>{key}</span>: <span className={classname}>{value}</span>
-	// 			</Typography>
-	//
-	// 		} else {
-	// 			return <pre key={index}>{line}</pre>
-	// 		}
-	// 	});
-	//
-	//
-	//
-	//
-	// }, [data])
+	}, [ref, data])
 
 
-	return <div className={"JsonViewer"} ref={ref}>
-		{/*{ret}*/}
-	</div>;
+	return <div className={"JsonViewer"} ref={ref}/>;
 }
-
-export default JsonViewer;

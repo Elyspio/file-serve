@@ -8,16 +8,31 @@ import {Close, GetApp, Visibility} from "@material-ui/icons";
 import {useModal} from "../../../hooks/useModal";
 import {useAppSelector} from "../../../../store";
 import {themes} from "../../../../config/theme";
+import {JsonViewer} from "../../viewer/JsonViewer";
+import {WebContentViewer} from "../../viewer/WebContentViewer";
 
 
 const getComponentFromMime = (mime: string) => {
-	return (props: any) => {
-		if (mime !== "application/pdf") return <Typography color={"textSecondary"} component={"div"}>
-			<pre>
-				{props}
-			</pre>
-		</Typography>
-		else return <iframe src={`data:application/pdf;base64,${props}`} style={{width: "100%", height: "99%"}} frameBorder="0"/>
+	/**
+	 * @param content base64 encoded content
+	 */
+	return (content: string) => {
+		if (["application/pdf", "image/png", "image/jpeg"].includes(mime)) {
+			return <WebContentViewer content={content} mime={mime}/>
+		} else {
+			content = Buffer.from(content, "base64").toString("utf8");
+
+			if (mime === "application/json") {
+				return <JsonViewer data={JSON.parse(content)}/>
+			}
+
+			return <Typography color={"textSecondary"} component={"div"}>
+				<pre>
+					{content}
+				</pre>
+			</Typography>
+		}
+
 	}
 }
 
@@ -26,7 +41,7 @@ type FileProps = {
 	user?: boolean
 }
 
-export function FileDetail({data: {id, name,mime}, user}: FileProps) {
+export function FileDetail({data: {id, name, mime}, user}: FileProps) {
 
 	const [previewContent, setPreviewContent] = useState("")
 	const {setOpen, open, setClose} = useModal(false)
@@ -97,9 +112,8 @@ export function FileDetail({data: {id, name,mime}, user}: FileProps) {
 				<DialogTitle id={`file-dialog-${id}-title`}>
 					{name}
 				</DialogTitle>
-				<DialogContent dividers style={{width: "50vw", height: "70vh"}}>
-					{getComponentFromMime(mime)(previewContent)}
-
+				<DialogContent dividers style={{width: "60vw", height: "60vh"}}>
+					{previewContent && getComponentFromMime(mime)(previewContent)}
 				</DialogContent>
 				<DialogActions>
 					<Box p={1}>

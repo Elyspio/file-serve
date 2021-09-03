@@ -82,7 +82,7 @@ export class PublicFilesController {
 			const file = await this.filesService.getCommonFile(id);
 			const readStream = new stream.PassThrough();
 			readStream.end(file.content);
-			const download = Buffer.from(file.content   , 'base64')
+			const download = Buffer.from(file.content, 'base64')
 
 			response.writeHead(200, {
 				'Content-Disposition': `attachment; filename="${file.name}"`,
