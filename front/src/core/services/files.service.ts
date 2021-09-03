@@ -36,7 +36,7 @@ export class FilesService {
 		delete: this.deletePublic.bind(this),
 		getContent: this.getContentPublic.bind(this),
 		list: this.listPublic.bind(this),
-		get: this.getPublic.bind(this)
+		get: this.getPublic.bind(this),
 	}
 	public user = {
 		add: this.addUser.bind(this),
@@ -44,7 +44,7 @@ export class FilesService {
 		delete: this.deleteUser.bind(this),
 		getContent: this.getContentUser.bind(this),
 		list: this.listUser.bind(this),
-		get: this.getUser.bind(this)
+		get: this.getUser.bind(this),
 	}
 	@inject(DiKeysApi.backend)
 	private backendApi!: BackendApi
@@ -110,6 +110,7 @@ export class FilesService {
 	private async getContentUser(id: FileModel["id"]) {
 		return this.backendApi.clients.files.user.getFileContent(id).then(x => stringify(x.data));
 	}
+
 
 
 }

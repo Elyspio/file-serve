@@ -10,12 +10,23 @@ import {useAppSelector} from "../../../../store";
 import {themes} from "../../../../config/theme";
 
 
+const getComponentFromMime = (mime: string) => {
+	return (props: any) => {
+		if (mime !== "application/pdf") return <Typography color={"textSecondary"} component={"div"}>
+			<pre>
+				{props}
+			</pre>
+		</Typography>
+		else return <iframe src={`data:application/pdf;base64,${props}`} style={{width: "100%", height: "99%"}} frameBorder="0"/>
+	}
+}
+
 type FileProps = {
 	data: FileModel,
 	user?: boolean
 }
 
-export function FileDetail({data: {id, name}, user}: FileProps) {
+export function FileDetail({data: {id, name,mime}, user}: FileProps) {
 
 	const [previewContent, setPreviewContent] = useState("")
 	const {setOpen, open, setClose} = useModal(false)
@@ -38,7 +49,7 @@ export function FileDetail({data: {id, name}, user}: FileProps) {
 	}, [funcs, id])
 
 	const view = useCallback(async (e) => {
-		const content = await funcs.getContent(id);
+		const {content} = await funcs.get(id);
 		setOpen(e);
 		setPreviewContent(content);
 	}, [funcs, id, setOpen])
@@ -82,16 +93,13 @@ export function FileDetail({data: {id, name}, user}: FileProps) {
 			</Grid>
 
 
-			<Dialog onClose={setClose} aria-labelledby={`file-dialog-${name}`} open={open} maxWidth={false}>
-				<DialogTitle id={`file-dialog-${name}-title`}>
+			<Dialog onClose={setClose} aria-labelledby={`file-dialog-${id}`} open={open} maxWidth={false}>
+				<DialogTitle id={`file-dialog-${id}-title`}>
 					{name}
 				</DialogTitle>
-				<DialogContent dividers style={{width: "50vw"}}>
-					<Typography color={"textSecondary"} component={"div"}>
-						<pre>
-							{previewContent}
-						</pre>
-					</Typography>
+				<DialogContent dividers style={{width: "50vw", height: "70vh"}}>
+					{getComponentFromMime(mime)(previewContent)}
+
 				</DialogContent>
 				<DialogActions>
 					<Box p={1}>
