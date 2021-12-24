@@ -5,7 +5,5 @@ export const DiKeysService = {
 		settings: Symbol.for("LocalStorageService:elyspio-authentication-settings"),
 		validation: Symbol.for("LocalStorageService:elyspio-authentication-validation"),
 	},
-	files: Symbol.for("FilesService")
-
-}
-
+	files: Symbol.for("FilesService"),
+};

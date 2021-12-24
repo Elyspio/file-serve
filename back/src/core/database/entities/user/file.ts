@@ -1,29 +1,22 @@
-import {Column} from "typeorm";
-
+import { Column } from "typeorm";
 
 export class File {
+	@Column()
+	id: string;
 
 	@Column()
-	id: string
+	name: string;
 
 	@Column()
-	name: string
-
-	/**
-	 * base64 encoded
-	 */
-	@Column()
-	content: string
+	mime: string;
 
 	@Column()
-	mime: string
+	gridId: string;
 
-
-	constructor(id: string, name: string, content: string, mime: string) {
+	constructor(id: string, name: string, mime: string, gridId: string) {
 		this.id = id;
 		this.name = name;
-		this.content = content;
 		this.mime = mime;
+		this.gridId = gridId;
 	}
 }
-

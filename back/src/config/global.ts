@@ -1,5 +1,3 @@
 export const globalConf = {
-	appName: "File-Serve"
-}
-
-
+	appName: "File-Serve",
+};

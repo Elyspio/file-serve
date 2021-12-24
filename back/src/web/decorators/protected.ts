@@ -1,10 +1,9 @@
-import {In, JsonParameterTypes, Returns} from "@tsed/schema";
-import {UseAuth} from "@tsed/common";
-import {useDecorators} from "@tsed/core";
-import {Forbidden} from "@tsed/exceptions/lib/clientErrors"
-import {authorization_cookie_token} from "../../config/authentication";
-import {RequireLogin} from "../middleware/authentication";
-
+import { In, JsonParameterTypes, Returns } from "@tsed/schema";
+import { UseAuth } from "@tsed/common";
+import { useDecorators } from "@tsed/core";
+import { Forbidden } from "@tsed/exceptions/lib/clientErrors";
+import { authorization_cookie_token } from "../../config/authentication";
+import { RequireLogin } from "../middleware/authentication";
 
 export function Protected(): Function {
 	return useDecorators(

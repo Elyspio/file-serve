@@ -1,18 +1,14 @@
-import {Column, Entity, ObjectID, ObjectIdColumn} from "typeorm";
-import {File} from "./file";
-
+import { Column, Entity, ObjectID, ObjectIdColumn } from "typeorm";
+import { File } from "./file";
 
 @Entity("user")
 export class UserEntity {
-
 	@ObjectIdColumn()
-	id: ObjectID
+	id: ObjectID;
 
 	@Column()
-	username: string
+	username: string;
 
-	@Column(() => File, {array: true})
-	files: File[]
-
+	@Column(() => File, { array: true })
+	files: File[];
 }
-

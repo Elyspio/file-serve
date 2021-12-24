@@ -1,8 +1,8 @@
-import {EventEmitter} from "events";
+import { EventEmitter } from "events";
 
 type Event = {
-	[key in string]: (...args: any) => void
-}
+	[key in string]: (...args: any) => void;
+};
 
 export class EventManager<T extends Event = {}> {
 	private base = new EventEmitter();

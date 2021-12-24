@@ -2,7 +2,7 @@ version: "3"
 services:
     file-serve:
         container_name: "file-serve"
-        image: elyspio/file-serve
+        image: elyspio/file-serve:app
         volumes:
             - "./config/front/conf.js:/front/conf.js"
         environment:
@@ -25,9 +25,12 @@ services:
             - "traefik.http.routers.file-serve.entrypoints=external"
         depends_on:
             - file-serve-db
-
+        build:
+            dockerfile: build/app/db.dockerfile
     file-serve-db:
-        image: mongo
+        image: elyspio/file-serve:db
+        build:
+            dockerfile: build/db/db.dockerfile
         restart: always
         environment:
             MONGO_INITDB_ROOT_USERNAME: secured

@@ -12,11 +12,10 @@
  * Do not edit the class manually.
  */
 
-
-import {Configuration} from "./configuration";
+import { Configuration } from "./configuration";
 // Some imports not used depending on template conditions
 // @ts-ignore
-import globalAxios, {AxiosInstance, AxiosPromise} from 'axios';
+import globalAxios, { AxiosInstance, AxiosPromise, AxiosRequestConfig } from "axios";
 
 export const BASE_PATH = "http://localhost".replace(/\/+$/, "");
 
@@ -38,7 +37,7 @@ export const COLLECTION_FORMATS = {
  */
 export interface RequestArgs {
 	url: string;
-	options: any;
+	options: AxiosRequestConfig;
 }
 
 /**
@@ -55,7 +54,7 @@ export class BaseAPI {
 			this.basePath = configuration.basePath || this.basePath;
 		}
 	}
-};
+}
 
 /**
  *
