@@ -4,6 +4,7 @@ import { themeReducer } from "./module/theme/theme.reducer";
 import { authenticationReducer } from "./module/authentication/authentication.reducer";
 import { connectRouter, routerMiddleware } from "connected-react-router";
 import { createBrowserHistory } from "history";
+import { filesReducer } from "./module/files/files.reducer";
 
 export const history = createBrowserHistory({
 	basename: "/file-serve",
@@ -14,6 +15,7 @@ const createRootReducer = (history) =>
 		router: connectRouter(history),
 		theme: themeReducer,
 		authentication: authenticationReducer,
+		files: filesReducer,
 		// rest of your reducers
 	});
 

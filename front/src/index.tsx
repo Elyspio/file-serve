@@ -25,7 +25,9 @@ function Wrapper() {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Application />
+			<React.StrictMode>
+				<Application />
+			</React.StrictMode>
 			<ToastContainer position={"top-left"} />
 			<CssBaseline />
 		</ThemeProvider>

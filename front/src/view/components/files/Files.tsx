@@ -1,10 +1,6 @@
 import { Box, Button, Container, Divider, Grid, IconButton, Paper } from "@material-ui/core";
 import "./Files.scss";
 import * as React from "react";
-import { FilesService } from "../../../core/services/files.service";
-import { useInjection } from "inversify-react";
-import { DiKeysService } from "../../../core/di/di.keys.service";
-import { useAsyncState } from "../../hooks/useAsyncState";
 import { FileDetail } from "./detail/FileDetail";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { AddCircle, Replay } from "@material-ui/icons";
@@ -14,32 +10,36 @@ import { routes } from "../../../config/routes";
 import { login } from "../../../store/module/authentication/authentication.action";
 import { AuthenticationEvents } from "../../../core/services/authentication.service";
 import { FileModel } from "../../../core/apis/backend/generated";
+import { getFiles } from "../../../store/module/files/files.action";
 
 export const Files = () => {
-	const services = {
-		files: useInjection<FilesService>(DiKeysService.files),
-	};
-
 	const logged = useAppSelector((s) => s.authentication.logged);
+	const { user: userFiles, public: publicFiles } = useAppSelector((s) => s.files);
 
-	const common = useAsyncState(services.files.public.list, []);
+	const dispatch = useAppDispatch();
 
-	const getUserData = React.useCallback(() => {
-		if (logged) return services.files.user.list();
-		return Promise.resolve([]);
-	}, [logged, services.files.user]);
+	const reload = React.useCallback(
+		(type: "user" | "public") => {
+			dispatch(getFiles(type));
+		},
+		[dispatch]
+	);
 
-	const { data: userData, reload: userReload } = useAsyncState(getUserData, []);
+	const { reloadUser, reloadPublic } = React.useMemo(
+		() => ({
+			reloadUser: () => reload("user"),
+			reloadPublic: () => reload("public"),
+		}),
+		[reload]
+	);
 
 	React.useEffect(() => {
 		AuthenticationEvents.on("login", () => {
-			return userReload();
+			return reloadUser();
 		});
-	}, [userReload]);
+	}, [reloadUser]);
 
 	// region callbacks
-
-	const dispatch = useAppDispatch();
 
 	const addFile = React.useCallback(
 		(user: boolean) => () => {
@@ -50,6 +50,8 @@ export const Files = () => {
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
 
+	React.useEffect(() => reloadPublic(), [reloadPublic]);
+
 	// endregion
 
 	return (
@@ -57,21 +59,23 @@ export const Files = () => {
 			<Grid container spacing={4} direction={"row"}>
 				<Grid item xs={6}>
 					<Paper>
-						<FileContainer user={false} title={"Public files"} add={addFile(false)} data={common.data} reload={common.reload} />
+						<FileContainer user={false} title={"Public files"} add={addFile(false)} data={publicFiles} reload={reloadPublic} />
 					</Paper>
 				</Grid>
 
 				<Grid item xs={6}>
 					<Paper>
 						{logged ? (
-							<FileContainer user={true} title={"Your files"} add={addFile(true)} data={userData} reload={userReload} />
+							<FileContainer user={true} title={"Your files"} add={addFile(true)} data={userFiles} reload={reloadUser} />
 						) : (
 							<Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
 								<Button onClick={redirectToLogin}>Login to see your files</Button>
 							</Box>
 						)}
 
-						<video src={"/file-serve/api/files/user/be5dc036feb31050/stream"} controls autoPlay muted />
+						{/*<video width={350} height={360} controls autoPlay muted>*/}
+						{/*	<source src="/file-serve/files/public/61cb920e1159b9f3dcb23678/stream" type="video/mp4" />*/}
+						{/*</video>*/}
 					</Paper>
 				</Grid>
 			</Grid>
