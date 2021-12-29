@@ -33,10 +33,10 @@ public class PublicController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(string), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required][FromForm] string location,  [Required] IFormFile file)
     {
         var stream = file.OpenReadStream();
-        var fileId = await fileService.AddPublicFile(filename, file.ContentType, stream);
+        var fileId = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
         return Created($"/files/public/{fileId}", fileId);
     }
 

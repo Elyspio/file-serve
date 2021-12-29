@@ -13,7 +13,9 @@ public class FileAssembler : BaseAssembler<FileData, FileModel>
             Filename = obj.Filename,
             Id = obj.Id,
             Mime = obj.Mime,
-            Username = obj.Username
+            Username = obj.Username,
+            Location = obj.Location,
+            Size = obj.Size,
         };
     }
 

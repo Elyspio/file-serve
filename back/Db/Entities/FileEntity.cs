@@ -14,6 +14,10 @@ public class FileEntity
     public string Filename { get; set; }
 
     public string Mime { get; set; }
+    public string Location { get; set; }
+
+    public long Size { get; set; }
+
 
     [BsonRepresentation(BsonType.ObjectId)]
     public ObjectId IdGridFs { get; set; }

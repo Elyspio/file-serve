@@ -38,13 +38,15 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
         return assembler.Convert(files).ToList();
     }
 
-    public async Task<FileData> AddFile(string username, string filename, string mime, Stream content)
+    public async Task<FileData> AddFile(string username, string filename, string mime, Stream content, string location)
     {
         var file = new FileEntity
         {
             Filename = filename,
             Mime = mime,
-            Username = username
+            Username = username,
+            Location = location,
+            Size = content.Length
         };
         await EntityCollection.InsertOneAsync(file);
 

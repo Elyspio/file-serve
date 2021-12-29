@@ -21,9 +21,9 @@ internal class FileService : IFileService
         return await GetUserFiles(PublicUser);
     }
 
-    public async Task<string> AddPublicFile(string filename, string mime, Stream content)
+    public async Task<string> AddPublicFile(string filename, string mime, Stream content, string location)
     {
-        return await AddUserFile(PublicUser, filename, mime, content);
+        return await AddUserFile(PublicUser, filename, mime, content, location);
     }
 
     public async Task<(byte[], string)> GetPublicFileContent(string id)
@@ -51,9 +51,10 @@ internal class FileService : IFileService
         return await repository.GetFiles(username);
     }
 
-    public async Task<string> AddUserFile(string username, string filename, string mime, Stream content)
+    public async Task<string> AddUserFile(string username, string filename, string mime, Stream content,
+        string location)
     {
-        var file = await repository.AddFile(username, filename, mime, content);
+        var file = await repository.AddFile(username, filename, mime, content, location);
         return file.Id;
     }
 
