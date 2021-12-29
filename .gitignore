@@ -6,3 +6,7 @@
 
 deploy/dev/data
 deploy/prod/config/front/conf.js
+!deploy/build/
+.vs
+back/*/bin
+back/*/obj
