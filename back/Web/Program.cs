@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Adapters.Authentication;
 using Core.Utils;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -34,20 +35,21 @@ var useBuilder = () =>
     });
 
 
+    var authenticationServerUrl = Env.Get<string>("AUTHENTICATION_SERVER_URI");
+
     builder.Services.AddHttpClient<IAuthenticationClient, AuthenticationClient>(client =>
     {
         var configuration = builder.Configuration;
         client.BaseAddress =
-            new Uri(
-                $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
+            new Uri(authenticationServerUrl ?? $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
     });
 
     builder.Services.AddHttpClient<IUsersClient, UsersClient>(client =>
     {
         var configuration = builder.Configuration;
         client.BaseAddress =
-            new Uri(
-                $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
+            new Uri(authenticationServerUrl ?? $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
+
     });
 
 
@@ -104,6 +106,17 @@ var useApp = (WebApplication application) =>
     application.UseCors("Cors");
 
     application.MapControllers();
+
+
+    if (application.Environment.IsProduction())
+    {
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Env.Get<string>("FRONT_PATH", true)!),
+            RequestPath = "/"
+        });
+    }
+
 
     application.Run();
 };
