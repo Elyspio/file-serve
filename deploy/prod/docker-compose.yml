@@ -2,7 +2,7 @@ version: "3"
 services:
     file-serve:
         container_name: "file-serve"
-        image: elyspio/file-serve:app
+        image: elyspio/file-serve
         volumes:
             - "./config/front/conf.js:/front/conf.js"
         environment:
@@ -12,6 +12,7 @@ services:
             DB_PASSWORD: secured
             DB_DATABASE: admin
             DB_PORT: 27017
+            FILES_FOLDER: /files
         networks:
             - external
             - file-serve-network
@@ -21,16 +22,13 @@ services:
             - "traefik.http.middlewares.file-serve-prefix.stripprefix.prefixes=/file-serve"
             - "traefik.http.routers.file-serve.middlewares=file-serve-prefix@docker"
             - "traefik.http.routers.file-serve.rule=PathPrefix(`/file-serve`)"
-            - "traefik.http.services.file-serve.loadbalancer.server.port=4000"
+            - "traefik.http.services.file-serve.loadbalancer.server.port=4003"
             - "traefik.http.routers.file-serve.entrypoints=external"
         depends_on:
             - file-serve-db
-        build:
-            dockerfile: build/app/db.dockerfile
+
     file-serve-db:
-        image: elyspio/file-serve:db
-        build:
-            dockerfile: build/db/db.dockerfile
+        image: mongo:latest
         restart: always
         environment:
             MONGO_INITDB_ROOT_USERNAME: secured
@@ -40,6 +38,8 @@ services:
         networks:
             - internal
             - file-serve-network
+        volumes:
+            - "./db:/data/db"
 
 networks:
     file-serve-network:
