@@ -7,7 +7,7 @@ import { createBrowserHistory } from "history";
 import { filesReducer } from "./module/files/files.reducer";
 
 export const history = createBrowserHistory({
-	basename: "/file-serve",
+	basename: "/files",
 });
 
 const createRootReducer = (history) =>

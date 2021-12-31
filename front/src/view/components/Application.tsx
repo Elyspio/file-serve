@@ -1,24 +1,27 @@
 import * as React from "react";
 import "./Application.scss";
-import Brightness5Icon from "@material-ui/icons/Brightness5";
-import Brightness3Icon from "@material-ui/icons/Brightness3";
+import Brightness5Icon from "@mui/icons-material/Brightness5";
+import Brightness3Icon from "@mui/icons-material/Brightness3";
 import { Files } from "./files/Files";
-import { useAppDispatch, useAppSelector } from "../../store";
+import { useAppSelector } from "../../store";
 import { toggleTheme } from "../../store/module/theme/theme.action";
 import { createDrawerAction, withDrawer } from "./utils/drawer/Drawer.hoc";
-import { Box } from "@material-ui/core";
-import Login from "@material-ui/icons/AccountCircle";
+import { Box } from "@mui/material";
+import Login from "@mui/icons-material/AccountCircle";
 import { ReactComponent as Logout } from "../icons/logout.svg";
 import { login, logout, silentLogin } from "../../store/module/authentication/authentication.action";
 import { updateToastTheme } from "./utils/toast";
 import { Route, Switch as SwitchRouter } from "react-router";
 import { Routes, routes } from "../../config/routes";
 import { AddFile } from "./files/add/AddFile";
-import { AddCircle, Home } from "@material-ui/icons";
+import { AddCircle, Home } from "@mui/icons-material";
 import { push } from "connected-react-router";
+import { useDispatch } from "react-redux";
+import { getFiles } from "../../store/module/files/files.action";
+import { AuthenticationEvents } from "../../core/services/authentication.service";
 
 function Application() {
-	const dispatch = useAppDispatch();
+	const dispatch = useDispatch();
 
 	const { theme, themeIcon, logged } = useAppSelector((s) => ({
 		theme: s.theme.current,
@@ -27,6 +30,8 @@ function Application() {
 	}));
 
 	React.useEffect(() => updateToastTheme(theme), [theme]);
+
+	// region actions
 
 	const actions = [
 		createDrawerAction(theme === "dark" ? "Light Mode" : "Dark Mode", {
@@ -79,9 +84,22 @@ function Application() {
 		}
 	}
 
+	// endregion
+
+	// region getFiles
+
+	React.useEffect(() => {
+		AuthenticationEvents.on("login", () => {
+			dispatch(getFiles("user"));
+		});
+	}, [dispatch]);
+
 	React.useEffect(() => {
 		dispatch(silentLogin());
+		dispatch(getFiles("public"));
 	}, [dispatch]);
+
+	// endregion
 
 	const drawer = withDrawer({
 		component: (

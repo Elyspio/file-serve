@@ -1,16 +1,16 @@
-import { Box, Button, Container, Divider, Grid, IconButton, Paper } from "@material-ui/core";
+import { Box, Button, Container, Divider, Grid, IconButton, Paper } from "@mui/material";
 import "./Files.scss";
 import * as React from "react";
 import { FileDetail } from "./detail/FileDetail";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { AddCircle, Replay } from "@material-ui/icons";
+import { AddCircle, Replay } from "@mui/icons-material";
 import { Title } from "../utils/title";
 import { push } from "connected-react-router";
 import { routes } from "../../../config/routes";
 import { login } from "../../../store/module/authentication/authentication.action";
-import { AuthenticationEvents } from "../../../core/services/authentication.service";
 import { FileModel } from "../../../core/apis/backend/generated";
 import { getFiles } from "../../../store/module/files/files.action";
+import { FilesExplorer } from "./explorer/FilesExplorer";
 
 export const Files = () => {
 	const logged = useAppSelector((s) => s.authentication.logged);
@@ -33,12 +33,6 @@ export const Files = () => {
 		[reload]
 	);
 
-	React.useEffect(() => {
-		AuthenticationEvents.on("login", () => {
-			return reloadUser();
-		});
-	}, [reloadUser]);
-
 	// region callbacks
 
 	const addFile = React.useCallback(
@@ -50,23 +44,41 @@ export const Files = () => {
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
 
-	React.useEffect(() => reloadPublic(), [reloadPublic]);
-
 	// endregion
 
 	return (
 		<Container className={"Files"}>
-			<Grid container spacing={4} direction={"row"}>
+			<Grid container spacing={4} direction={"row"} mt={2}>
 				<Grid item xs={6}>
 					<Paper>
-						<FileContainer user={false} title={"Public files"} add={addFile(false)} data={publicFiles} reload={reloadPublic} />
+						<Grid direction={"column"} alignItems={"center"} container>
+							<Grid item>
+								<Title>Public files</Title>
+							</Grid>
+							<Divider sx={{ width: "100%", height: 1 }} light />
+							<Grid item container>
+								<FilesExplorer files={publicFiles} owner={"public"} />
+							</Grid>
+						</Grid>
+
+						{/*<FileContainer user={false} title={"Public files"} add={addFile(false)} data={publicFiles} reload={reloadPublic} />*/}
 					</Paper>
 				</Grid>
 
 				<Grid item xs={6}>
 					<Paper>
 						{logged ? (
-							<FileContainer user={true} title={"Your files"} add={addFile(true)} data={userFiles} reload={reloadUser} />
+							<>
+								<Grid direction={"column"} alignItems={"center"} container>
+									<Grid item>
+										<Title>Your files</Title>
+									</Grid>
+									<Grid item container>
+										<FilesExplorer files={userFiles} owner={"user"} />
+									</Grid>
+								</Grid>
+								{/*<FileContainer user={true} title={"Your files"} add={addFile(true)} data={userFiles} reload={reloadUser} />*/}
+							</>
 						) : (
 							<Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
 								<Button onClick={redirectToLogin}>Login to see your files</Button>
@@ -100,11 +112,11 @@ function FileContainer({ add, reload, data, user, title }: FileContainerProps) {
 				<Box className={"file-header"} display={"flex"} alignItems={"center"} justifyContent={"space-between"} width={"100%"}>
 					<Title>{title}</Title>
 					<div className={"actions"}>
-						<IconButton onClick={reload}>
+						<IconButton onClick={reload} size="large">
 							<Replay />
 						</IconButton>
 						{logged && (
-							<IconButton onClick={add}>
+							<IconButton onClick={add} size="large">
 								<AddCircle />
 							</IconButton>
 						)}

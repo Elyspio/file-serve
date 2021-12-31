@@ -17,7 +17,7 @@ export const addFile = createAsyncThunk("files/addFile", async (params: { type: 
 	await dispatch(push(routes.home));
 });
 
-export const deleteFile = createAsyncThunk("files/addFile", async (params: { type: "user" | "public"; fileId: string }, { dispatch }) => {
+export const deleteFile = createAsyncThunk("files/deleteFile", async (params: { type: "user" | "public"; fileId: string }, { dispatch }) => {
 	await service[params.type].delete(params.fileId);
 	await dispatch(getFiles(params.type));
 });

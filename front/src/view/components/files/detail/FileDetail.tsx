@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography } from "@material-ui/core";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography } from "@mui/material";
 import { useInjection } from "inversify-react";
 import { DiKeysService } from "../../../../core/di/di.keys.service";
 import { FilesService } from "../../../../core/services/files.service";
 import { FileModel } from "../../../../core/apis/backend/generated";
-import { Close, GetApp, Visibility } from "@material-ui/icons";
+import { Close, GetApp, Visibility } from "@mui/icons-material";
 import { useModal } from "../../../hooks/useModal";
 import { useAppDispatch, useAppSelector } from "../../../../store";
 import { themes } from "../../../../config/theme";
@@ -92,20 +92,20 @@ export function FileDetail({ data: { id, filename, mime }, user }: FileProps) {
 
 			<Grid container xs={6} item direction={"row"} alignItems={"center"} justifyContent={"flex-end"} wrap={"nowrap"} spacing={1}>
 				<Grid item>
-					<IconButton title={"Preview file"} onClick={view}>
+					<IconButton title={"Preview file"} onClick={view} size="large">
 						<Visibility style={{ fill: colors.view }} />
 					</IconButton>
 				</Grid>
 
 				<Grid item>
-					<IconButton title={"Download file"} onClick={download}>
+					<IconButton title={"Download file"} onClick={download} size="large">
 						<GetApp style={{ fill: colors.download }} />
 					</IconButton>
 				</Grid>
 
 				{logged && (
 					<Grid item>
-						<IconButton title={"Delete file"} onClick={del}>
+						<IconButton title={"Delete file"} onClick={del} size="large">
 							<Close style={{ fill: colors.del }} />
 						</IconButton>
 					</Grid>
