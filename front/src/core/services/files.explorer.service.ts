@@ -1,19 +1,23 @@
 import { injectable } from "inversify";
 import { FileModel } from "../apis/backend/generated";
 
-interface NodeFile {
+interface NodeShared {
+	id: number;
+	path: string;
+}
+
+interface NodeFile extends NodeShared {
 	type: "file";
 	data: FileModel;
 }
 
-export interface NodeFolder {
+export interface NodeFolder extends NodeShared {
 	type: "folder";
 	nodes: NodeElem[];
 }
 
 export type NodeElem = (NodeFolder | NodeFile) & {
-	id: number;
-	path: string;
+	parent?: NodeFolder;
 };
 
 let currentId = 1;
@@ -35,6 +39,27 @@ export class FilesExplorerService {
 		return ret;
 	}
 
+	public getNodeParents(root: NodeElem, id: NodeElem["id"]) {
+		if (root.type !== "folder") throw new Error("Root must be a NodeFolder");
+		const nodes = this.findNodes(root).filter((node) => node !== false) as NodeElem[];
+		let node = nodes.find((node) => node.id === id);
+		if (!node) throw new Error(`Could not find the node ${id} in root with id ${root.id}`);
+		let parents: NodeElem[] = [];
+		while (node.parent) {
+			parents.push(node.parent);
+			node = node.parent;
+		}
+		return parents.reverse();
+	}
+
+	private findNodes(root: NodeElem): (NodeElem | false)[] {
+		if (root.type === "folder") {
+			return [root, ...root.nodes.map((node) => this.findNodes(node)).flat()];
+		} else {
+			return [root];
+		}
+	}
+
 	private createBranches(root: NodeElem, path: string) {
 		const split = path.split("/").filter((x) => x.length);
 		let current = root as NodeFolder;
@@ -45,6 +70,7 @@ export class FilesExplorerService {
 					type: "folder",
 					nodes: [],
 					id: currentId++,
+					parent: current,
 				});
 			}
 			current = current.nodes!.find((item) => item.path === p)! as NodeFolder;
@@ -65,6 +91,7 @@ export class FilesExplorerService {
 			type: "file",
 			data: leaf,
 			id: currentId++,
+			parent: current,
 		});
 	}
 }

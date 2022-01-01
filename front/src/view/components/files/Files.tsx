@@ -5,11 +5,8 @@ import { FileDetail } from "./detail/FileDetail";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { AddCircle, Replay } from "@mui/icons-material";
 import { Title } from "../utils/title";
-import { push } from "connected-react-router";
-import { routes } from "../../../config/routes";
 import { login } from "../../../store/module/authentication/authentication.action";
 import { FileModel } from "../../../core/apis/backend/generated";
-import { getFiles } from "../../../store/module/files/files.action";
 import { FilesExplorer } from "./explorer/FilesExplorer";
 
 export const Files = () => {
@@ -17,30 +14,6 @@ export const Files = () => {
 	const { user: userFiles, public: publicFiles } = useAppSelector((s) => s.files);
 
 	const dispatch = useAppDispatch();
-
-	const reload = React.useCallback(
-		(type: "user" | "public") => {
-			dispatch(getFiles(type));
-		},
-		[dispatch]
-	);
-
-	const { reloadUser, reloadPublic } = React.useMemo(
-		() => ({
-			reloadUser: () => reload("user"),
-			reloadPublic: () => reload("public"),
-		}),
-		[reload]
-	);
-
-	// region callbacks
-
-	const addFile = React.useCallback(
-		(user: boolean) => () => {
-			dispatch(push({ pathname: routes.addFile, state: { user } }));
-		},
-		[dispatch]
-	);
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
 

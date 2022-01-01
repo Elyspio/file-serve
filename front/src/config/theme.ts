@@ -1,43 +1,29 @@
-import { createTheme, Theme } from "@material-ui/core";
-import * as colors from "@material-ui/core/colors";
-import { UserSettingsModel } from "../core/apis/authentication/generated";
-import { ThemeService } from "../core/services/theme.service";
-import { LocalStorageService } from "../core/services/localStorage.service";
-import { container } from "../core/di";
-import { DiKeysService } from "../core/di/di.keys.service";
+import { createTheme, Theme } from "@mui/material";
+import * as colors from "@mui/material/colors";
 
 const darkTheme = createTheme({
 	palette: {
-		type: "dark",
+		mode: "dark",
 		secondary: {
 			...colors.grey,
-			main: colors.grey["500"],
+			main: colors.indigo["500"],
 		},
 		primary: {
-			...colors.teal,
-			main: colors.teal["A400"],
+			...colors.blue,
+			main: colors.blue["400"],
 		},
 		background: {
 			paper: "#1d1d1d",
 			default: "#181818",
 		},
 	},
-	overrides: {
-		MuiCssBaseline: {
-			"@global": {
-				"*": {
-					"scrollbar-width": "thin",
-				},
-				"*::-webkit-scrollbar": {
-					width: "4px",
-					height: "4px",
-					backgroundColor: "#222",
-				},
-				"*::-webkit-scrollbar-track": {
-					"-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.00)",
-				},
-				"*::-webkit-scrollbar-thumb": {
-					backgroundColor: "#CCC",
+	components: {
+		MuiPaper: {
+			styleOverrides: {
+				root: {
+					"&.MuiPaper-root": {
+						backgroundImage: "unset !important",
+					},
 				},
 			},
 		},
@@ -46,7 +32,7 @@ const darkTheme = createTheme({
 
 const lightTheme = createTheme({
 	palette: {
-		type: "light",
+		mode: "light",
 		secondary: {
 			...colors.grey,
 			main: colors.grey["900"],
@@ -55,23 +41,18 @@ const lightTheme = createTheme({
 			...colors.blue,
 			main: colors.blue["400"],
 		},
+		background: {
+			paper: "#ffffff",
+			default: "#e6e6e6",
+		},
 	},
-	overrides: {
-		MuiCssBaseline: {
-			"@global": {
-				"*": {
-					"scrollbar-width": "thin",
-				},
-				"*::-webkit-scrollbar": {
-					width: "4px",
-					height: "4px",
-					backgroundColor: "#CCC",
-				},
-				"*::-webkit-scrollbar-track": {
-					"-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.00)",
-				},
-				"*::-webkit-scrollbar-thumb": {
-					backgroundColor: "#333",
+	components: {
+		MuiPaper: {
+			styleOverrides: {
+				root: {
+					"&.MuiPaper-root": {
+						backgroundImage: "unset !important",
+					},
 				},
 			},
 		},
@@ -84,19 +65,6 @@ export const themes = {
 };
 
 export type Themes = "dark" | "light";
-const themeService = container.get<ThemeService>(DiKeysService.theme);
-const localStorageSettings = container.get<LocalStorageService>(DiKeysService.localStorage.settings);
-
-export const getUrlTheme = (): Themes => {
-	let fromUrl = new URL(window.location.toString()).searchParams.get("theme");
-	let fromSession = localStorageSettings.retrieve<UserSettingsModel>();
-	if (fromUrl) return fromUrl as Themes;
-	if (fromSession?.theme) {
-		if (fromSession.theme === "system") {
-			return themeService.getThemeFromSystem();
-		} else return fromSession.theme;
-	}
-	return "light";
-};
+export const getUrlTheme = (): Themes => new URL(window.location.toString()).searchParams.get("theme") || ("dark" as any);
 
 export const getCurrentTheme = (theme: Themes): Theme => themes[theme];

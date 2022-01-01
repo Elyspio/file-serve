@@ -5,8 +5,8 @@ import { FilesExplorerService, NodeElem, NodeFolder } from "../../../../core/ser
 import { DiKeysService } from "../../../../core/di/di.keys.service";
 import { Grid, IconButton } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
-import { usePrevious } from "../../../hooks/usePrevious";
 import { NodeExplorer } from "./NodeExplorer";
+import { FilesBreadcrumb } from "./FilesBreadcrumb";
 
 interface FileExplorerProps {
 	files: FileModel[];
@@ -18,40 +18,44 @@ export function FilesExplorer({ files, owner }: FileExplorerProps) {
 		explorer: useInjection<FilesExplorerService>(DiKeysService.filesExplorer),
 	};
 
-	let root = services.explorer.convert(files);
+	let root = React.useMemo(() => services.explorer.convert(files), [services.explorer, files]);
 	const [current, setCurrent] = React.useState<NodeElem>(root);
-	const previous = usePrevious(current);
+
 	React.useEffect(() => {
-		setCurrent(services.explorer.convert(files));
-	}, [services.explorer, files]);
+		setCurrent(root);
+	}, [root]);
 
 	const goBack = React.useCallback(() => {
-		if (previous) setCurrent(previous);
-	}, [previous]);
+		if (current.parent) setCurrent(current.parent);
+	}, [current.parent]);
 
 	const goIn = React.useCallback((node: NodeElem) => {
 		setCurrent(node);
 	}, []);
 
+	if (files.length === 0) return null;
+
 	return (
-		<Grid className={"FilesExplorer"} container spacing={2} alignItems={"center"} p={1}>
-			{
-				// TODO JGD add https://mui.com/components/breadcrumbs/
-			}
+		<Grid className={"FilesExplorer"} container direction={"column"} p={1}>
+			<Grid item p={1} bgcolor={"background.default"}>
+				<FilesBreadcrumb root={root} setCurrent={goIn} current={current} />
+			</Grid>
 
-			{current.id !== root.id && (
-				<Grid item>
-					<IconButton onClick={goBack}>
-						<ArrowBack />
-					</IconButton>
-				</Grid>
-			)}
+			<Grid container item spacing={2} alignItems={"center"} my={1}>
+				{current.id !== root.id && (
+					<Grid item>
+						<IconButton onClick={goBack}>
+							<ArrowBack />
+						</IconButton>
+					</Grid>
+				)}
 
-			{(current as NodeFolder).nodes.map((node) => (
-				<Grid item>
-					<NodeExplorer owner={owner} node={node} setCurrent={goIn} />
-				</Grid>
-			))}
+				{(current as NodeFolder).nodes.map((node) => (
+					<Grid item key={node.id}>
+						<NodeExplorer owner={owner} node={node} setCurrent={goIn} />
+					</Grid>
+				))}
+			</Grid>
 		</Grid>
 	);
 }
