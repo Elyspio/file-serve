@@ -4,35 +4,35 @@ services:
         container_name: "file-serve"
         image: elyspio/file-serve
         volumes:
-            - "./config/front/conf.js:/front/conf.js"
+            - "./config/front/conf.js:/back/wwwroot/conf.js"
         environment:
-            AUTHENTICATION_SERVER_URI: "https://elyspio.fr/authentication"
-            DB_HOST: file-serve-db
-            DB_USERNAME: secured
-            DB_PASSWORD: secured
-            DB_DATABASE: admin
-            DB_PORT: 27017
-            FILES_FOLDER: /files
+            AUTHENTICATION_SERVER_URI: "https://elyspio.fr/authentication/"
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_HOST: ${DB_HOST}
+            DB_USERNAME: ${DB_USERNAME}
+            DB_PORT: ${DB_PORT}
+            DB_DATABASE: ${DB_DATABASE}
         networks:
             - external
             - file-serve-network
         labels:
             - "traefik.enable=true"
             - "traefik.docker.network=external"
-            - "traefik.http.middlewares.file-serve-prefix.stripprefix.prefixes=/file-serve"
+            - "traefik.http.middlewares.file-serve-prefix.stripprefix.prefixes=/files"
             - "traefik.http.routers.file-serve.middlewares=file-serve-prefix@docker"
-            - "traefik.http.routers.file-serve.rule=PathPrefix(`/file-serve`)"
+            - "traefik.http.routers.file-serve.rule=PathPrefix(`/files`)"
             - "traefik.http.services.file-serve.loadbalancer.server.port=4003"
             - "traefik.http.routers.file-serve.entrypoints=external"
         depends_on:
             - file-serve-db
 
     file-serve-db:
+        container_name: file-serve-db
         image: mongo:latest
         restart: always
         environment:
-            MONGO_INITDB_ROOT_USERNAME: secured
-            MONGO_INITDB_ROOT_PASSWORD: secured
+            MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
         ports:
             - "27017:27017"
         networks:
