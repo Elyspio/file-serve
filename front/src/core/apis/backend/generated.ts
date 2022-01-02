@@ -13,48 +13,42 @@ export interface IPublicClient {
 	/**
 	 * @return Success
 	 */
-	publicGetFiles(): Promise<FileModel[]>;
-
+	getFiles(): Promise<FileModel[]>;
 	/**
 	 * @param filename (optional)
 	 * @param location (optional)
 	 * @param file (optional)
 	 * @return Success
 	 */
-	publicAddFile(filename?: string | undefined, location?: string | undefined, file?: FileParameter | undefined): Promise<string>;
-
+	addFile(filename?: string | undefined, location?: string | undefined, file?: FileParameter | undefined): Promise<FileModel>;
 	/**
 	 * @return Success
 	 */
-	publicGetFileContent(id: string): Promise<FileResponse>;
-
+	getFileContent(id: string): Promise<FileResponse>;
 	/**
 	 * @return Success
 	 */
-	publicGetFileContentAsString(id: string): Promise<string>;
-
+	getFileContentAsString(id: string): Promise<string>;
 	/**
 	 * @return Success
 	 */
-	publicGetFileContentAsStream(id: string): Promise<void>;
-
+	getFileContentAsStream(id: string): Promise<void>;
 	/**
 	 * @return Success
 	 */
-	publicGetFile(id: string): Promise<FileModel>;
-
+	getFile(id: string): Promise<FileModel>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	publicDeleteFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
+	deleteFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
 }
 
 export class PublicClient implements IPublicClient {
-	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 	private instance: AxiosInstance;
 	private baseUrl: string;
+	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
 	constructor(baseUrl?: string, instance?: AxiosInstance) {
 		this.instance = instance ? instance : axios.create();
@@ -65,7 +59,7 @@ export class PublicClient implements IPublicClient {
 	/**
 	 * @return Success
 	 */
-	publicGetFiles(cancelToken?: CancelToken | undefined): Promise<FileModel[]> {
+	getFiles(cancelToken?: CancelToken | undefined): Promise<FileModel[]> {
 		let url_ = this.baseUrl + "/files/public";
 		url_ = url_.replace(/[?&]$/, "");
 
@@ -73,7 +67,7 @@ export class PublicClient implements IPublicClient {
 			method: "GET",
 			url: url_,
 			headers: {
-				Accept: "text/plain",
+				Accept: "application/json",
 			},
 			cancelToken,
 		};
@@ -88,8 +82,31 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicGetFiles(_response);
+				return this.processGetFiles(_response);
 			});
+	}
+
+	protected processGetFiles(response: AxiosResponse): Promise<FileModel[]> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = JSON.parse(resultData200);
+			return Promise.resolve<FileModel[]>(result200);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel[]>(<any>null);
 	}
 
 	/**
@@ -98,7 +115,7 @@ export class PublicClient implements IPublicClient {
 	 * @param file (optional)
 	 * @return Success
 	 */
-	publicAddFile(filename?: string | undefined, location?: string | undefined, file?: FileParameter | undefined, cancelToken?: CancelToken | undefined): Promise<string> {
+	addFile(filename?: string | undefined, location?: string | undefined, file?: FileParameter | undefined, cancelToken?: CancelToken | undefined): Promise<FileModel> {
 		let url_ = this.baseUrl + "/files/public";
 		url_ = url_.replace(/[?&]$/, "");
 
@@ -115,7 +132,7 @@ export class PublicClient implements IPublicClient {
 			method: "POST",
 			url: url_,
 			headers: {
-				Accept: "text/plain",
+				Accept: "application/json",
 			},
 			cancelToken,
 		};
@@ -130,14 +147,37 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicAddFile(_response);
+				return this.processAddFile(_response);
 			});
+	}
+
+	protected processAddFile(response: AxiosResponse): Promise<FileModel> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 201) {
+			const _responseText = response.data;
+			let result201: any = null;
+			let resultData201 = _responseText;
+			result201 = JSON.parse(resultData201);
+			return Promise.resolve<FileModel>(result201);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel>(<any>null);
 	}
 
 	/**
 	 * @return Success
 	 */
-	publicGetFileContent(id: string, cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+	getFileContent(id: string, cancelToken?: CancelToken | undefined): Promise<FileResponse> {
 		let url_ = this.baseUrl + "/files/public/{id}/binary";
 		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
 		url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -163,14 +203,36 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicGetFileContent(_response);
+				return this.processGetFileContent(_response);
 			});
+	}
+
+	protected processGetFileContent(response: AxiosResponse): Promise<FileResponse> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200 || status === 206) {
+			const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+			const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+			const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+			return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileResponse>(<any>null);
 	}
 
 	/**
 	 * @return Success
 	 */
-	publicGetFileContentAsString(id: string, cancelToken?: CancelToken | undefined): Promise<string> {
+	getFileContentAsString(id: string, cancelToken?: CancelToken | undefined): Promise<string> {
 		let url_ = this.baseUrl + "/files/public/{id}/string";
 		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
 		url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -195,14 +257,37 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicGetFileContentAsString(_response);
+				return this.processGetFileContentAsString(_response);
 			});
+	}
+
+	protected processGetFileContentAsString(response: AxiosResponse): Promise<string> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = resultData200;
+			return Promise.resolve<string>(result200);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<string>(<any>null);
 	}
 
 	/**
 	 * @return Success
 	 */
-	publicGetFileContentAsStream(id: string, cancelToken?: CancelToken | undefined): Promise<void> {
+	getFileContentAsStream(id: string, cancelToken?: CancelToken | undefined): Promise<void> {
 		let url_ = this.baseUrl + "/files/public/{id}/stream";
 		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
 		url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -225,14 +310,34 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicGetFileContentAsStream(_response);
+				return this.processGetFileContentAsStream(_response);
 			});
+	}
+
+	protected processGetFileContentAsStream(response: AxiosResponse): Promise<void> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 206) {
+			const _responseText = response.data;
+			return Promise.resolve<void>(<any>null);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<void>(<any>null);
 	}
 
 	/**
 	 * @return Success
 	 */
-	publicGetFile(id: string, cancelToken?: CancelToken | undefined): Promise<FileModel> {
+	getFile(id: string, cancelToken?: CancelToken | undefined): Promise<FileModel> {
 		let url_ = this.baseUrl + "/files/public/{id}";
 		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
 		url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -242,7 +347,7 @@ export class PublicClient implements IPublicClient {
 			method: "GET",
 			url: url_,
 			headers: {
-				Accept: "text/plain",
+				Accept: "application/json",
 			},
 			cancelToken,
 		};
@@ -257,8 +362,31 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicGetFile(_response);
+				return this.processGetFile(_response);
 			});
+	}
+
+	protected processGetFile(response: AxiosResponse): Promise<FileModel> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = JSON.parse(resultData200);
+			return Promise.resolve<FileModel>(result200);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel>(<any>null);
 	}
 
 	/**
@@ -266,7 +394,7 @@ export class PublicClient implements IPublicClient {
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	publicDeleteFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<void> {
+	deleteFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<void> {
 		let url_ = this.baseUrl + "/files/public/{id}";
 		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
 		url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -291,145 +419,11 @@ export class PublicClient implements IPublicClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processPublicDeleteFile(_response);
+				return this.processDeleteFile(_response);
 			});
 	}
 
-	protected processPublicGetFiles(response: AxiosResponse): Promise<FileModel[]> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = JSON.parse(resultData200);
-			return Promise.resolve<FileModel[]>(result200);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel[]>(<any>null);
-	}
-
-	protected processPublicAddFile(response: AxiosResponse): Promise<string> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 201) {
-			const _responseText = response.data;
-			let result201: any = null;
-			let resultData201 = _responseText;
-			result201 = JSON.parse(resultData201);
-			return Promise.resolve<string>(result201);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<string>(<any>null);
-	}
-
-	protected processPublicGetFileContent(response: AxiosResponse): Promise<FileResponse> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200 || status === 206) {
-			const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-			const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-			const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-			return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileResponse>(<any>null);
-	}
-
-	protected processPublicGetFileContentAsString(response: AxiosResponse): Promise<string> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = resultData200;
-			return Promise.resolve<string>(result200);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<string>(<any>null);
-	}
-
-	protected processPublicGetFileContentAsStream(response: AxiosResponse): Promise<void> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 206) {
-			const _responseText = response.data;
-			return Promise.resolve<void>(<any>null);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<void>(<any>null);
-	}
-
-	protected processPublicGetFile(response: AxiosResponse): Promise<FileModel> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = JSON.parse(resultData200);
-			return Promise.resolve<FileModel>(result200);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel>(<any>null);
-	}
-
-	protected processPublicDeleteFile(response: AxiosResponse): Promise<void> {
+	protected processDeleteFile(response: AxiosResponse): Promise<void> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -462,8 +456,7 @@ export interface IUsersClient {
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersGetFiles(authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileModel[]>;
-
+	getFiles2(authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileModel[]>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -472,54 +465,49 @@ export interface IUsersClient {
 	 * @param file (optional)
 	 * @return Success
 	 */
-	usersAddFile(
+	addFile2(
 		authentication_tokenHeader?: any | undefined,
 		authentication_tokenCookie?: any | undefined,
 		filename?: string | undefined,
 		location?: string | undefined,
 		file?: FileParameter | undefined
-	): Promise<string>;
-
+	): Promise<FileModel>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersGetFileContent(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileResponse>;
-
+	getFileContent2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileResponse>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersGetFileContentAsString(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<string>;
-
+	getFileContentAsString2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<string>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersGetFileContentAsStream(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
-
+	getFileContentAsStream2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersGetFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileModel>;
-
+	getFile2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileModel>;
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersDeleteFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
+	deleteFile2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
 }
 
 export class UsersClient implements IUsersClient {
-	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 	private instance: AxiosInstance;
 	private baseUrl: string;
+	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
 	constructor(baseUrl?: string, instance?: AxiosInstance) {
 		this.instance = instance ? instance : axios.create();
@@ -532,7 +520,7 @@ export class UsersClient implements IUsersClient {
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
-	usersGetFiles(authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<FileModel[]> {
+	getFiles2(authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<FileModel[]> {
 		let url_ = this.baseUrl + "/files/user";
 		url_ = url_.replace(/[?&]$/, "");
 
@@ -541,7 +529,7 @@ export class UsersClient implements IUsersClient {
 			url: url_,
 			headers: {
 				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-				Accept: "text/plain",
+				Accept: "application/json",
 			},
 			cancelToken,
 		};
@@ -556,237 +544,11 @@ export class UsersClient implements IUsersClient {
 				}
 			})
 			.then((_response: AxiosResponse) => {
-				return this.processUsersGetFiles(_response);
+				return this.processGetFiles2(_response);
 			});
 	}
 
-	/**
-	 * @param authentication_tokenHeader (optional)
-	 * @param authentication_tokenCookie (optional)
-	 * @param filename (optional)
-	 * @param location (optional)
-	 * @param file (optional)
-	 * @return Success
-	 */
-	usersAddFile(
-		authentication_tokenHeader?: any | undefined,
-		authentication_tokenCookie?: any | undefined,
-		filename?: string | undefined,
-		location?: string | undefined,
-		file?: FileParameter | undefined,
-		cancelToken?: CancelToken | undefined
-	): Promise<string> {
-		let url_ = this.baseUrl + "/files/user";
-		url_ = url_.replace(/[?&]$/, "");
-
-		const content_ = new FormData();
-		if (filename === null || filename === undefined) throw new Error("The parameter 'filename' cannot be null.");
-		else content_.append("filename", filename.toString());
-		if (location === null || location === undefined) throw new Error("The parameter 'location' cannot be null.");
-		else content_.append("location", location.toString());
-		if (file === null || file === undefined) throw new Error("The parameter 'file' cannot be null.");
-		else content_.append("file", file.data, file.fileName ? file.fileName : "file");
-
-		let options_ = <AxiosRequestConfig>{
-			data: content_,
-			method: "POST",
-			url: url_,
-			headers: {
-				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-				Accept: "text/plain",
-			},
-			cancelToken,
-		};
-
-		return this.instance
-			.request(options_)
-			.catch((_error: any) => {
-				if (isAxiosError(_error) && _error.response) {
-					return _error.response;
-				} else {
-					throw _error;
-				}
-			})
-			.then((_response: AxiosResponse) => {
-				return this.processUsersAddFile(_response);
-			});
-	}
-
-	/**
-	 * @param authentication_tokenHeader (optional)
-	 * @param authentication_tokenCookie (optional)
-	 * @return Success
-	 */
-	usersGetFileContent(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-		let url_ = this.baseUrl + "/files/user/{id}/binary";
-		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
-		url_ = url_.replace("{id}", encodeURIComponent("" + id));
-		url_ = url_.replace(/[?&]$/, "");
-
-		let options_ = <AxiosRequestConfig>{
-			responseType: "blob",
-			method: "GET",
-			url: url_,
-			headers: {
-				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-				Accept: "application/octet-stream",
-			},
-			cancelToken,
-		};
-
-		return this.instance
-			.request(options_)
-			.catch((_error: any) => {
-				if (isAxiosError(_error) && _error.response) {
-					return _error.response;
-				} else {
-					throw _error;
-				}
-			})
-			.then((_response: AxiosResponse) => {
-				return this.processUsersGetFileContent(_response);
-			});
-	}
-
-	/**
-	 * @param authentication_tokenHeader (optional)
-	 * @param authentication_tokenCookie (optional)
-	 * @return Success
-	 */
-	usersGetFileContentAsString(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<string> {
-		let url_ = this.baseUrl + "/files/user/{id}/string";
-		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
-		url_ = url_.replace("{id}", encodeURIComponent("" + id));
-		url_ = url_.replace(/[?&]$/, "");
-
-		let options_ = <AxiosRequestConfig>{
-			method: "GET",
-			url: url_,
-			headers: {
-				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-				Accept: "text/plain",
-			},
-			cancelToken,
-		};
-
-		return this.instance
-			.request(options_)
-			.catch((_error: any) => {
-				if (isAxiosError(_error) && _error.response) {
-					return _error.response;
-				} else {
-					throw _error;
-				}
-			})
-			.then((_response: AxiosResponse) => {
-				return this.processUsersGetFileContentAsString(_response);
-			});
-	}
-
-	/**
-	 * @param authentication_tokenHeader (optional)
-	 * @param authentication_tokenCookie (optional)
-	 * @return Success
-	 */
-	usersGetFileContentAsStream(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<void> {
-		let url_ = this.baseUrl + "/files/user/{id}/stream";
-		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
-		url_ = url_.replace("{id}", encodeURIComponent("" + id));
-		url_ = url_.replace(/[?&]$/, "");
-
-		let options_ = <AxiosRequestConfig>{
-			method: "GET",
-			url: url_,
-			headers: {
-				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-			},
-			cancelToken,
-		};
-
-		return this.instance
-			.request(options_)
-			.catch((_error: any) => {
-				if (isAxiosError(_error) && _error.response) {
-					return _error.response;
-				} else {
-					throw _error;
-				}
-			})
-			.then((_response: AxiosResponse) => {
-				return this.processUsersGetFileContentAsStream(_response);
-			});
-	}
-
-	/**
-	 * @param authentication_tokenHeader (optional)
-	 * @param authentication_tokenCookie (optional)
-	 * @return Success
-	 */
-	usersGetFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<FileModel> {
-		let url_ = this.baseUrl + "/files/user/{id}";
-		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
-		url_ = url_.replace("{id}", encodeURIComponent("" + id));
-		url_ = url_.replace(/[?&]$/, "");
-
-		let options_ = <AxiosRequestConfig>{
-			method: "GET",
-			url: url_,
-			headers: {
-				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-				Accept: "text/plain",
-			},
-			cancelToken,
-		};
-
-		return this.instance
-			.request(options_)
-			.catch((_error: any) => {
-				if (isAxiosError(_error) && _error.response) {
-					return _error.response;
-				} else {
-					throw _error;
-				}
-			})
-			.then((_response: AxiosResponse) => {
-				return this.processUsersGetFile(_response);
-			});
-	}
-
-	/**
-	 * @param authentication_tokenHeader (optional)
-	 * @param authentication_tokenCookie (optional)
-	 * @return Success
-	 */
-	usersDeleteFile(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<void> {
-		let url_ = this.baseUrl + "/files/user/{id}";
-		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
-		url_ = url_.replace("{id}", encodeURIComponent("" + id));
-		url_ = url_.replace(/[?&]$/, "");
-
-		let options_ = <AxiosRequestConfig>{
-			method: "DELETE",
-			url: url_,
-			headers: {
-				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
-			},
-			cancelToken,
-		};
-
-		return this.instance
-			.request(options_)
-			.catch((_error: any) => {
-				if (isAxiosError(_error) && _error.response) {
-					return _error.response;
-				} else {
-					throw _error;
-				}
-			})
-			.then((_response: AxiosResponse) => {
-				return this.processUsersDeleteFile(_response);
-			});
-	}
-
-	protected processUsersGetFiles(response: AxiosResponse): Promise<FileModel[]> {
+	protected processGetFiles2(response: AxiosResponse): Promise<FileModel[]> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -815,7 +577,59 @@ export class UsersClient implements IUsersClient {
 		return Promise.resolve<FileModel[]>(<any>null);
 	}
 
-	protected processUsersAddFile(response: AxiosResponse): Promise<string> {
+	/**
+	 * @param authentication_tokenHeader (optional)
+	 * @param authentication_tokenCookie (optional)
+	 * @param filename (optional)
+	 * @param location (optional)
+	 * @param file (optional)
+	 * @return Success
+	 */
+	addFile2(
+		authentication_tokenHeader?: any | undefined,
+		authentication_tokenCookie?: any | undefined,
+		filename?: string | undefined,
+		location?: string | undefined,
+		file?: FileParameter | undefined,
+		cancelToken?: CancelToken | undefined
+	): Promise<FileModel> {
+		let url_ = this.baseUrl + "/files/user";
+		url_ = url_.replace(/[?&]$/, "");
+
+		const content_ = new FormData();
+		if (filename === null || filename === undefined) throw new Error("The parameter 'filename' cannot be null.");
+		else content_.append("filename", filename.toString());
+		if (location === null || location === undefined) throw new Error("The parameter 'location' cannot be null.");
+		else content_.append("location", location.toString());
+		if (file === null || file === undefined) throw new Error("The parameter 'file' cannot be null.");
+		else content_.append("file", file.data, file.fileName ? file.fileName : "file");
+
+		let options_ = <AxiosRequestConfig>{
+			data: content_,
+			method: "POST",
+			url: url_,
+			headers: {
+				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
+				Accept: "application/json",
+			},
+			cancelToken,
+		};
+
+		return this.instance
+			.request(options_)
+			.catch((_error: any) => {
+				if (isAxiosError(_error) && _error.response) {
+					return _error.response;
+				} else {
+					throw _error;
+				}
+			})
+			.then((_response: AxiosResponse) => {
+				return this.processAddFile2(_response);
+			});
+	}
+
+	protected processAddFile2(response: AxiosResponse): Promise<FileModel> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -830,7 +644,7 @@ export class UsersClient implements IUsersClient {
 			let result201: any = null;
 			let resultData201 = _responseText;
 			result201 = JSON.parse(resultData201);
-			return Promise.resolve<string>(result201);
+			return Promise.resolve<FileModel>(result201);
 		} else if (status === 401) {
 			const _responseText = response.data;
 			return throwException("Unauthorized", status, _responseText, _headers);
@@ -841,10 +655,46 @@ export class UsersClient implements IUsersClient {
 			const _responseText = response.data;
 			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
 		}
-		return Promise.resolve<string>(<any>null);
+		return Promise.resolve<FileModel>(<any>null);
 	}
 
-	protected processUsersGetFileContent(response: AxiosResponse): Promise<FileResponse> {
+	/**
+	 * @param authentication_tokenHeader (optional)
+	 * @param authentication_tokenCookie (optional)
+	 * @return Success
+	 */
+	getFileContent2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+		let url_ = this.baseUrl + "/files/user/{id}/binary";
+		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
+		url_ = url_.replace("{id}", encodeURIComponent("" + id));
+		url_ = url_.replace(/[?&]$/, "");
+
+		let options_ = <AxiosRequestConfig>{
+			responseType: "blob",
+			method: "GET",
+			url: url_,
+			headers: {
+				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
+				Accept: "application/octet-stream",
+			},
+			cancelToken,
+		};
+
+		return this.instance
+			.request(options_)
+			.catch((_error: any) => {
+				if (isAxiosError(_error) && _error.response) {
+					return _error.response;
+				} else {
+					throw _error;
+				}
+			})
+			.then((_response: AxiosResponse) => {
+				return this.processGetFileContent2(_response);
+			});
+	}
+
+	protected processGetFileContent2(response: AxiosResponse): Promise<FileResponse> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -872,7 +722,42 @@ export class UsersClient implements IUsersClient {
 		return Promise.resolve<FileResponse>(<any>null);
 	}
 
-	protected processUsersGetFileContentAsString(response: AxiosResponse): Promise<string> {
+	/**
+	 * @param authentication_tokenHeader (optional)
+	 * @param authentication_tokenCookie (optional)
+	 * @return Success
+	 */
+	getFileContentAsString2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<string> {
+		let url_ = this.baseUrl + "/files/user/{id}/string";
+		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
+		url_ = url_.replace("{id}", encodeURIComponent("" + id));
+		url_ = url_.replace(/[?&]$/, "");
+
+		let options_ = <AxiosRequestConfig>{
+			method: "GET",
+			url: url_,
+			headers: {
+				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
+				Accept: "text/plain",
+			},
+			cancelToken,
+		};
+
+		return this.instance
+			.request(options_)
+			.catch((_error: any) => {
+				if (isAxiosError(_error) && _error.response) {
+					return _error.response;
+				} else {
+					throw _error;
+				}
+			})
+			.then((_response: AxiosResponse) => {
+				return this.processGetFileContentAsString2(_response);
+			});
+	}
+
+	protected processGetFileContentAsString2(response: AxiosResponse): Promise<string> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -901,7 +786,41 @@ export class UsersClient implements IUsersClient {
 		return Promise.resolve<string>(<any>null);
 	}
 
-	protected processUsersGetFileContentAsStream(response: AxiosResponse): Promise<void> {
+	/**
+	 * @param authentication_tokenHeader (optional)
+	 * @param authentication_tokenCookie (optional)
+	 * @return Success
+	 */
+	getFileContentAsStream2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<void> {
+		let url_ = this.baseUrl + "/files/user/{id}/stream";
+		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
+		url_ = url_.replace("{id}", encodeURIComponent("" + id));
+		url_ = url_.replace(/[?&]$/, "");
+
+		let options_ = <AxiosRequestConfig>{
+			method: "GET",
+			url: url_,
+			headers: {
+				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
+			},
+			cancelToken,
+		};
+
+		return this.instance
+			.request(options_)
+			.catch((_error: any) => {
+				if (isAxiosError(_error) && _error.response) {
+					return _error.response;
+				} else {
+					throw _error;
+				}
+			})
+			.then((_response: AxiosResponse) => {
+				return this.processGetFileContentAsStream2(_response);
+			});
+	}
+
+	protected processGetFileContentAsStream2(response: AxiosResponse): Promise<void> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -927,7 +846,42 @@ export class UsersClient implements IUsersClient {
 		return Promise.resolve<void>(<any>null);
 	}
 
-	protected processUsersGetFile(response: AxiosResponse): Promise<FileModel> {
+	/**
+	 * @param authentication_tokenHeader (optional)
+	 * @param authentication_tokenCookie (optional)
+	 * @return Success
+	 */
+	getFile2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<FileModel> {
+		let url_ = this.baseUrl + "/files/user/{id}";
+		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
+		url_ = url_.replace("{id}", encodeURIComponent("" + id));
+		url_ = url_.replace(/[?&]$/, "");
+
+		let options_ = <AxiosRequestConfig>{
+			method: "GET",
+			url: url_,
+			headers: {
+				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
+				Accept: "application/json",
+			},
+			cancelToken,
+		};
+
+		return this.instance
+			.request(options_)
+			.catch((_error: any) => {
+				if (isAxiosError(_error) && _error.response) {
+					return _error.response;
+				} else {
+					throw _error;
+				}
+			})
+			.then((_response: AxiosResponse) => {
+				return this.processGetFile2(_response);
+			});
+	}
+
+	protected processGetFile2(response: AxiosResponse): Promise<FileModel> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -956,7 +910,41 @@ export class UsersClient implements IUsersClient {
 		return Promise.resolve<FileModel>(<any>null);
 	}
 
-	protected processUsersDeleteFile(response: AxiosResponse): Promise<void> {
+	/**
+	 * @param authentication_tokenHeader (optional)
+	 * @param authentication_tokenCookie (optional)
+	 * @return Success
+	 */
+	deleteFile2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined, cancelToken?: CancelToken | undefined): Promise<void> {
+		let url_ = this.baseUrl + "/files/user/{id}";
+		if (id === undefined || id === null) throw new Error("The parameter 'id' must be defined.");
+		url_ = url_.replace("{id}", encodeURIComponent("" + id));
+		url_ = url_.replace(/[?&]$/, "");
+
+		let options_ = <AxiosRequestConfig>{
+			method: "DELETE",
+			url: url_,
+			headers: {
+				"authentication-token": authentication_tokenHeader !== undefined && authentication_tokenHeader !== null ? "" + authentication_tokenHeader : "",
+			},
+			cancelToken,
+		};
+
+		return this.instance
+			.request(options_)
+			.catch((_error: any) => {
+				if (isAxiosError(_error) && _error.response) {
+					return _error.response;
+				} else {
+					throw _error;
+				}
+			})
+			.then((_response: AxiosResponse) => {
+				return this.processDeleteFile2(_response);
+			});
+	}
+
+	protected processDeleteFile2(response: AxiosResponse): Promise<void> {
 		const status = response.status;
 		let _headers: any = {};
 		if (response.headers && typeof response.headers === "object") {
@@ -1010,7 +998,6 @@ export class ApiException extends Error {
 	response: string;
 	headers: { [key: string]: any };
 	result: any;
-	protected isApiException = true;
 
 	constructor(message: string, status: number, response: string, headers: { [key: string]: any }, result: any) {
 		super();
@@ -1021,6 +1008,8 @@ export class ApiException extends Error {
 		this.headers = headers;
 		this.result = result;
 	}
+
+	protected isApiException = true;
 
 	static isApiException(obj: any): obj is ApiException {
 		return obj.isApiException === true;

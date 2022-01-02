@@ -33,6 +33,17 @@ export function FilesExplorer({ files, owner }: FileExplorerProps) {
 		setCurrent(node);
 	}, []);
 
+	const nodes = React.useMemo(() => {
+		const nodes = [...(current as NodeFolder).nodes];
+		nodes.sort((a, b) => {
+			if (a.type === b.type) return a.path.localeCompare(b.path);
+			if (a.type === "folder" && b.type === "file") return -1;
+			if (a.type === "file" && b.type === "folder") return 1;
+			return a.id < b.id ? -1 : 1;
+		});
+		return nodes;
+	}, [current]);
+
 	if (files.length === 0) return null;
 
 	return (
@@ -50,7 +61,7 @@ export function FilesExplorer({ files, owner }: FileExplorerProps) {
 					</Grid>
 				)}
 
-				{(current as NodeFolder).nodes.map((node) => (
+				{nodes.map((node) => (
 					<Grid item key={node.id}>
 						<NodeExplorer owner={owner} node={node} setCurrent={goIn} />
 					</Grid>

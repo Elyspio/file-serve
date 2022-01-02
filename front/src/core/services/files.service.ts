@@ -4,7 +4,7 @@ import { BackendApi } from "../apis/backend";
 import { FileModel } from "../apis/backend/generated";
 import { ToastOn } from "../utils/decorators";
 
-function download({ content, name, mime }: { name: string; content: Blob; mime: string }) {
+function download({ content, name }: { name: string; content: Blob }) {
 	const link = window.document.createElement("a");
 	link.href = window.URL.createObjectURL(content);
 	link.download = name;
@@ -38,75 +38,75 @@ export class FilesService {
 
 	@ToastOn({ error: "Could not add the public file" }, { concatArgs: ["filename"] })
 	private async addPublic(filename: string, location: string, file: File) {
-		return this.backendApi.clients.files.public.publicAddFile(filename, location, { fileName: filename, data: file });
+		return this.backendApi.clients.files.public.addFile(filename, location, { fileName: filename, data: file });
 	}
 
 	@ToastOn({ error: "Could not delete the public file" }, { concatArgs: true })
 	private async deletePublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.publicDeleteFile(id);
+		return this.backendApi.clients.files.public.deleteFile(id);
 	}
 
 	@ToastOn({ error: "Could not list public files" })
 	private async listPublic() {
-		return this.backendApi.clients.files.public.publicGetFiles();
+		return this.backendApi.clients.files.public.getFiles();
 	}
 
 	@ToastOn({ error: "Could not download the public file" }, { concatArgs: true })
 	private async downloadPublic(id: FileModel["id"]) {
 		const file = await this.public.get(id);
 		const { data } = await this.public.getContent(id);
-		await download({ name: file.filename, content: data, mime: file.mime });
+		await download({ name: file.filename, content: data });
 	}
 
 	@ToastOn({ error: "Could not retrieve the public file" }, { concatArgs: true })
 	private async getPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.publicGetFile(id);
+		return this.backendApi.clients.files.public.getFile(id);
 	}
 
 	@ToastOn({ error: "Could not retrieve the public file content" }, { concatArgs: true })
 	private async getContentPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.publicGetFileContent(id);
+		return this.backendApi.clients.files.public.getFileContent(id);
 	}
 
 	@ToastOn({ error: "Could not retrieve the public file content as string" }, { concatArgs: true })
 	private async getContentAsStringPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.publicGetFileContentAsString(id);
+		return this.backendApi.clients.files.public.getFileContentAsString(id);
 	}
 
 	@ToastOn({ error: "Could not add your file" }, { concatArgs: ["filename"] })
 	private async addUser(filename: string, location: string, file: File) {
-		return this.backendApi.clients.files.user.usersAddFile(undefined, undefined, filename, location, { fileName: filename, data: file });
+		return this.backendApi.clients.files.user.addFile2(undefined, undefined, filename, location, { fileName: filename, data: file });
 	}
 
 	@ToastOn({ error: "Could not delete your file" }, { concatArgs: true })
 	private async deleteUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.usersDeleteFile(id);
+		return this.backendApi.clients.files.user.deleteFile2(id);
 	}
 
 	@ToastOn({ error: "Could not list your files" }, { concatArgs: true })
 	private async listUser() {
-		return this.backendApi.clients.files.user.usersGetFiles();
+		return this.backendApi.clients.files.user.getFiles2();
 	}
 
 	@ToastOn({ error: "Could not download your file" }, { concatArgs: true })
 	private async downloadUser(id: FileModel["id"]) {
 		const file = await this.user.get(id);
 		const { data } = await this.user.getContent(id);
-		await download({ name: file.filename, content: data, mime: file.mime });
+		await download({ name: file.filename, content: data });
 	}
 
 	@ToastOn({ error: "Could not retrieve your file" }, { concatArgs: true })
 	private async getUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.usersGetFile(id);
+		return this.backendApi.clients.files.user.getFile2(id);
 	}
 
 	@ToastOn({ error: "Could not retrieve your file content" }, { concatArgs: true })
 	private async getContentUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.usersGetFileContent(id);
+		return this.backendApi.clients.files.user.getFileContent2(id);
 	}
 
 	@ToastOn({ error: "Could not retrieve the public file content as string" }, { concatArgs: true })
 	private async getContentAsStringUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.usersGetFileContentAsString(id);
+		return this.backendApi.clients.files.user.getFileContentAsString2(id);
 	}
 }

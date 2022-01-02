@@ -43,7 +43,7 @@ const lightTheme = createTheme({
 		},
 		background: {
 			paper: "#ffffff",
-			default: "#e6e6e6",
+			default: "#eeeeee",
 		},
 	},
 	components: {
