@@ -7,12 +7,12 @@ interface NodeShared {
 }
 
 interface NodeFile extends NodeShared {
-	type: "file";
+	owner: "file";
 	data: FileModel;
 }
 
 export interface NodeFolder extends NodeShared {
-	type: "folder";
+	owner: "folder";
 	nodes: NodeElem[];
 }
 
@@ -28,7 +28,7 @@ export class FilesExplorerService {
 		const ret: NodeElem = {
 			nodes: [],
 			path: "/",
-			type: "folder",
+			owner: "folder",
 			id: 0,
 		};
 
@@ -40,7 +40,7 @@ export class FilesExplorerService {
 	}
 
 	public getNodeParents(root: NodeElem, id: NodeElem["id"]) {
-		if (root.type !== "folder") throw new Error("Root must be a NodeFolder");
+		if (root.owner !== "folder") throw new Error("Root must be a NodeFolder");
 		const nodes = this.findNodes(root).filter((node) => node !== false) as NodeElem[];
 		let node = nodes.find((node) => node.id === id);
 		if (!node) throw new Error(`Could not find the node ${id} in root with id ${root.id}`);
@@ -53,7 +53,7 @@ export class FilesExplorerService {
 	}
 
 	private findNodes(root: NodeElem): (NodeElem | false)[] {
-		if (root.type === "folder") {
+		if (root.owner === "folder") {
 			return [root, ...root.nodes.map((node) => this.findNodes(node)).flat()];
 		} else {
 			return [root];
@@ -67,7 +67,7 @@ export class FilesExplorerService {
 			if (!current.nodes!.find((item) => item.path === p)) {
 				current.nodes!.push({
 					path: p,
-					type: "folder",
+					owner: "folder",
 					nodes: [],
 					id: currentId++,
 					parent: current,
@@ -88,7 +88,7 @@ export class FilesExplorerService {
 		// add leaf
 		current.nodes!.push({
 			path: leaf.filename,
-			type: "file",
+			owner: "file",
 			data: leaf,
 			id: currentId++,
 			parent: current,

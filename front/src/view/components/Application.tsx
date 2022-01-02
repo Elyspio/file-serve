@@ -14,7 +14,7 @@ import { updateToastTheme } from "./utils/toast";
 import { Route, Switch as SwitchRouter } from "react-router";
 import { Routes, routes } from "../../config/routes";
 import { AddFile } from "./files/add/AddFile";
-import { AddCircle, Home } from "@mui/icons-material";
+import { Home } from "@mui/icons-material";
 import { push } from "connected-react-router";
 import { useDispatch } from "react-redux";
 import { getFiles } from "../../store/module/files/files.action";
@@ -73,15 +73,6 @@ function Application() {
 				onClick: () => dispatch(push(routes.home)),
 			})
 		);
-	} else {
-		if (logged) {
-			actions.push(
-				createDrawerAction("Add file", {
-					icon: <AddCircle fill={"currentColor"} />,
-					onClick: () => dispatch(push(routes.addFile)),
-				})
-			);
-		}
 	}
 
 	// endregion

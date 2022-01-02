@@ -14,7 +14,7 @@ const fileTypes = {
 export function AddFile() {
 	const {
 		location: { state },
-	} = useHistory<{ user: boolean }>();
+	} = useHistory<{ user: boolean; location?: string }>();
 
 	const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(state?.user ? "user" : "public");
 
@@ -23,18 +23,18 @@ export function AddFile() {
 	const { user: userFiles, public: publicFiles } = useAppSelector((s) => s.files);
 
 	const filePaths = React.useMemo(() => {
-		return (fileType === "user" ? userFiles : publicFiles).map((file) => file.location);
+		return [...new Set((fileType === "user" ? userFiles : publicFiles).map((file) => file.location))];
 	}, [userFiles, publicFiles, fileType]);
 
 	const dispatch = useAppDispatch();
 
 	const [file, setFile] = React.useState<File | null>(null);
 	const [filename, setFilename] = React.useState("");
-	const [location, setLocation] = React.useState("/");
+	const [location, setLocation] = React.useState(state?.location ?? "/");
 
 	const create = React.useCallback(async () => {
 		if (file !== null) {
-			dispatch(addFile({ type: fileType, filename, location, file }));
+			dispatch(addFile({ owner: fileType, filename, location, file }));
 		}
 	}, [dispatch, fileType, filename, file, location]);
 

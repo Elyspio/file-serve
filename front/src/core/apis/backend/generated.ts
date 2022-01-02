@@ -14,6 +14,7 @@ export interface IPublicClient {
 	 * @return Success
 	 */
 	getFiles(): Promise<FileModel[]>;
+
 	/**
 	 * @param filename (optional)
 	 * @param location (optional)
@@ -21,22 +22,27 @@ export interface IPublicClient {
 	 * @return Success
 	 */
 	addFile(filename?: string | undefined, location?: string | undefined, file?: FileParameter | undefined): Promise<FileModel>;
+
 	/**
 	 * @return Success
 	 */
 	getFileContent(id: string): Promise<FileResponse>;
+
 	/**
 	 * @return Success
 	 */
 	getFileContentAsString(id: string): Promise<string>;
+
 	/**
 	 * @return Success
 	 */
 	getFileContentAsStream(id: string): Promise<void>;
+
 	/**
 	 * @return Success
 	 */
 	getFile(id: string): Promise<FileModel>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -46,9 +52,9 @@ export interface IPublicClient {
 }
 
 export class PublicClient implements IPublicClient {
+	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 	private instance: AxiosInstance;
 	private baseUrl: string;
-	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
 	constructor(baseUrl?: string, instance?: AxiosInstance) {
 		this.instance = instance ? instance : axios.create();
@@ -84,29 +90,6 @@ export class PublicClient implements IPublicClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFiles(_response);
 			});
-	}
-
-	protected processGetFiles(response: AxiosResponse): Promise<FileModel[]> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = JSON.parse(resultData200);
-			return Promise.resolve<FileModel[]>(result200);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel[]>(<any>null);
 	}
 
 	/**
@@ -151,29 +134,6 @@ export class PublicClient implements IPublicClient {
 			});
 	}
 
-	protected processAddFile(response: AxiosResponse): Promise<FileModel> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 201) {
-			const _responseText = response.data;
-			let result201: any = null;
-			let resultData201 = _responseText;
-			result201 = JSON.parse(resultData201);
-			return Promise.resolve<FileModel>(result201);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel>(<any>null);
-	}
-
 	/**
 	 * @return Success
 	 */
@@ -205,28 +165,6 @@ export class PublicClient implements IPublicClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFileContent(_response);
 			});
-	}
-
-	protected processGetFileContent(response: AxiosResponse): Promise<FileResponse> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200 || status === 206) {
-			const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-			const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-			const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-			return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileResponse>(<any>null);
 	}
 
 	/**
@@ -261,29 +199,6 @@ export class PublicClient implements IPublicClient {
 			});
 	}
 
-	protected processGetFileContentAsString(response: AxiosResponse): Promise<string> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = resultData200;
-			return Promise.resolve<string>(result200);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<string>(<any>null);
-	}
-
 	/**
 	 * @return Success
 	 */
@@ -312,26 +227,6 @@ export class PublicClient implements IPublicClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFileContentAsStream(_response);
 			});
-	}
-
-	protected processGetFileContentAsStream(response: AxiosResponse): Promise<void> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 206) {
-			const _responseText = response.data;
-			return Promise.resolve<void>(<any>null);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<void>(<any>null);
 	}
 
 	/**
@@ -364,29 +259,6 @@ export class PublicClient implements IPublicClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFile(_response);
 			});
-	}
-
-	protected processGetFile(response: AxiosResponse): Promise<FileModel> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = JSON.parse(resultData200);
-			return Promise.resolve<FileModel>(result200);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel>(<any>null);
 	}
 
 	/**
@@ -423,6 +295,140 @@ export class PublicClient implements IPublicClient {
 			});
 	}
 
+	protected processGetFiles(response: AxiosResponse): Promise<FileModel[]> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = JSON.parse(resultData200);
+			return Promise.resolve<FileModel[]>(result200);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel[]>(<any>null);
+	}
+
+	protected processAddFile(response: AxiosResponse): Promise<FileModel> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 201) {
+			const _responseText = response.data;
+			let result201: any = null;
+			let resultData201 = _responseText;
+			result201 = JSON.parse(resultData201);
+			return Promise.resolve<FileModel>(result201);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel>(<any>null);
+	}
+
+	protected processGetFileContent(response: AxiosResponse): Promise<FileResponse> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200 || status === 206) {
+			const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+			const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+			const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+			return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileResponse>(<any>null);
+	}
+
+	protected processGetFileContentAsString(response: AxiosResponse): Promise<string> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = resultData200;
+			return Promise.resolve<string>(result200);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<string>(<any>null);
+	}
+
+	protected processGetFileContentAsStream(response: AxiosResponse): Promise<void> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 206) {
+			const _responseText = response.data;
+			return Promise.resolve<void>(<any>null);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<void>(<any>null);
+	}
+
+	protected processGetFile(response: AxiosResponse): Promise<FileModel> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = JSON.parse(resultData200);
+			return Promise.resolve<FileModel>(result200);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel>(<any>null);
+	}
+
 	protected processDeleteFile(response: AxiosResponse): Promise<void> {
 		const status = response.status;
 		let _headers: any = {};
@@ -457,6 +463,7 @@ export interface IUsersClient {
 	 * @return Success
 	 */
 	getFiles2(authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileModel[]>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -472,30 +479,35 @@ export interface IUsersClient {
 		location?: string | undefined,
 		file?: FileParameter | undefined
 	): Promise<FileModel>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
 	getFileContent2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileResponse>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
 	getFileContentAsString2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<string>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
 	getFileContentAsStream2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<void>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
 	 * @return Success
 	 */
 	getFile2(id: string, authentication_tokenHeader?: any | undefined, authentication_tokenCookie?: any | undefined): Promise<FileModel>;
+
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -505,9 +517,9 @@ export interface IUsersClient {
 }
 
 export class UsersClient implements IUsersClient {
+	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 	private instance: AxiosInstance;
 	private baseUrl: string;
-	protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
 	constructor(baseUrl?: string, instance?: AxiosInstance) {
 		this.instance = instance ? instance : axios.create();
@@ -546,35 +558,6 @@ export class UsersClient implements IUsersClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFiles2(_response);
 			});
-	}
-
-	protected processGetFiles2(response: AxiosResponse): Promise<FileModel[]> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = JSON.parse(resultData200);
-			return Promise.resolve<FileModel[]>(result200);
-		} else if (status === 401) {
-			const _responseText = response.data;
-			return throwException("Unauthorized", status, _responseText, _headers);
-		} else if (status === 403) {
-			const _responseText = response.data;
-			return throwException("Forbidden", status, _responseText, _headers);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel[]>(<any>null);
 	}
 
 	/**
@@ -629,35 +612,6 @@ export class UsersClient implements IUsersClient {
 			});
 	}
 
-	protected processAddFile2(response: AxiosResponse): Promise<FileModel> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 201) {
-			const _responseText = response.data;
-			let result201: any = null;
-			let resultData201 = _responseText;
-			result201 = JSON.parse(resultData201);
-			return Promise.resolve<FileModel>(result201);
-		} else if (status === 401) {
-			const _responseText = response.data;
-			return throwException("Unauthorized", status, _responseText, _headers);
-		} else if (status === 403) {
-			const _responseText = response.data;
-			return throwException("Forbidden", status, _responseText, _headers);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel>(<any>null);
-	}
-
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -692,34 +646,6 @@ export class UsersClient implements IUsersClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFileContent2(_response);
 			});
-	}
-
-	protected processGetFileContent2(response: AxiosResponse): Promise<FileResponse> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200 || status === 206) {
-			const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-			const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-			const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-			return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-		} else if (status === 401) {
-			const _responseText = response.data;
-			return throwException("Unauthorized", status, _responseText, _headers);
-		} else if (status === 403) {
-			const _responseText = response.data;
-			return throwException("Forbidden", status, _responseText, _headers);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileResponse>(<any>null);
 	}
 
 	/**
@@ -757,35 +683,6 @@ export class UsersClient implements IUsersClient {
 			});
 	}
 
-	protected processGetFileContentAsString2(response: AxiosResponse): Promise<string> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = resultData200;
-			return Promise.resolve<string>(result200);
-		} else if (status === 401) {
-			const _responseText = response.data;
-			return throwException("Unauthorized", status, _responseText, _headers);
-		} else if (status === 403) {
-			const _responseText = response.data;
-			return throwException("Forbidden", status, _responseText, _headers);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<string>(<any>null);
-	}
-
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -818,32 +715,6 @@ export class UsersClient implements IUsersClient {
 			.then((_response: AxiosResponse) => {
 				return this.processGetFileContentAsStream2(_response);
 			});
-	}
-
-	protected processGetFileContentAsStream2(response: AxiosResponse): Promise<void> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 206) {
-			const _responseText = response.data;
-			return Promise.resolve<void>(<any>null);
-		} else if (status === 401) {
-			const _responseText = response.data;
-			return throwException("Unauthorized", status, _responseText, _headers);
-		} else if (status === 403) {
-			const _responseText = response.data;
-			return throwException("Forbidden", status, _responseText, _headers);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<void>(<any>null);
 	}
 
 	/**
@@ -881,35 +752,6 @@ export class UsersClient implements IUsersClient {
 			});
 	}
 
-	protected processGetFile2(response: AxiosResponse): Promise<FileModel> {
-		const status = response.status;
-		let _headers: any = {};
-		if (response.headers && typeof response.headers === "object") {
-			for (let k in response.headers) {
-				if (response.headers.hasOwnProperty(k)) {
-					_headers[k] = response.headers[k];
-				}
-			}
-		}
-		if (status === 200) {
-			const _responseText = response.data;
-			let result200: any = null;
-			let resultData200 = _responseText;
-			result200 = JSON.parse(resultData200);
-			return Promise.resolve<FileModel>(result200);
-		} else if (status === 401) {
-			const _responseText = response.data;
-			return throwException("Unauthorized", status, _responseText, _headers);
-		} else if (status === 403) {
-			const _responseText = response.data;
-			return throwException("Forbidden", status, _responseText, _headers);
-		} else if (status !== 200 && status !== 204) {
-			const _responseText = response.data;
-			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-		}
-		return Promise.resolve<FileModel>(<any>null);
-	}
-
 	/**
 	 * @param authentication_tokenHeader (optional)
 	 * @param authentication_tokenCookie (optional)
@@ -942,6 +784,176 @@ export class UsersClient implements IUsersClient {
 			.then((_response: AxiosResponse) => {
 				return this.processDeleteFile2(_response);
 			});
+	}
+
+	protected processGetFiles2(response: AxiosResponse): Promise<FileModel[]> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = JSON.parse(resultData200);
+			return Promise.resolve<FileModel[]>(result200);
+		} else if (status === 401) {
+			const _responseText = response.data;
+			return throwException("Unauthorized", status, _responseText, _headers);
+		} else if (status === 403) {
+			const _responseText = response.data;
+			return throwException("Forbidden", status, _responseText, _headers);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel[]>(<any>null);
+	}
+
+	protected processAddFile2(response: AxiosResponse): Promise<FileModel> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 201) {
+			const _responseText = response.data;
+			let result201: any = null;
+			let resultData201 = _responseText;
+			result201 = JSON.parse(resultData201);
+			return Promise.resolve<FileModel>(result201);
+		} else if (status === 401) {
+			const _responseText = response.data;
+			return throwException("Unauthorized", status, _responseText, _headers);
+		} else if (status === 403) {
+			const _responseText = response.data;
+			return throwException("Forbidden", status, _responseText, _headers);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel>(<any>null);
+	}
+
+	protected processGetFileContent2(response: AxiosResponse): Promise<FileResponse> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200 || status === 206) {
+			const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+			const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+			const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+			return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+		} else if (status === 401) {
+			const _responseText = response.data;
+			return throwException("Unauthorized", status, _responseText, _headers);
+		} else if (status === 403) {
+			const _responseText = response.data;
+			return throwException("Forbidden", status, _responseText, _headers);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileResponse>(<any>null);
+	}
+
+	protected processGetFileContentAsString2(response: AxiosResponse): Promise<string> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = resultData200;
+			return Promise.resolve<string>(result200);
+		} else if (status === 401) {
+			const _responseText = response.data;
+			return throwException("Unauthorized", status, _responseText, _headers);
+		} else if (status === 403) {
+			const _responseText = response.data;
+			return throwException("Forbidden", status, _responseText, _headers);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<string>(<any>null);
+	}
+
+	protected processGetFileContentAsStream2(response: AxiosResponse): Promise<void> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 206) {
+			const _responseText = response.data;
+			return Promise.resolve<void>(<any>null);
+		} else if (status === 401) {
+			const _responseText = response.data;
+			return throwException("Unauthorized", status, _responseText, _headers);
+		} else if (status === 403) {
+			const _responseText = response.data;
+			return throwException("Forbidden", status, _responseText, _headers);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<void>(<any>null);
+	}
+
+	protected processGetFile2(response: AxiosResponse): Promise<FileModel> {
+		const status = response.status;
+		let _headers: any = {};
+		if (response.headers && typeof response.headers === "object") {
+			for (let k in response.headers) {
+				if (response.headers.hasOwnProperty(k)) {
+					_headers[k] = response.headers[k];
+				}
+			}
+		}
+		if (status === 200) {
+			const _responseText = response.data;
+			let result200: any = null;
+			let resultData200 = _responseText;
+			result200 = JSON.parse(resultData200);
+			return Promise.resolve<FileModel>(result200);
+		} else if (status === 401) {
+			const _responseText = response.data;
+			return throwException("Unauthorized", status, _responseText, _headers);
+		} else if (status === 403) {
+			const _responseText = response.data;
+			return throwException("Forbidden", status, _responseText, _headers);
+		} else if (status !== 200 && status !== 204) {
+			const _responseText = response.data;
+			return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+		}
+		return Promise.resolve<FileModel>(<any>null);
 	}
 
 	protected processDeleteFile2(response: AxiosResponse): Promise<void> {
@@ -998,6 +1010,7 @@ export class ApiException extends Error {
 	response: string;
 	headers: { [key: string]: any };
 	result: any;
+	protected isApiException = true;
 
 	constructor(message: string, status: number, response: string, headers: { [key: string]: any }, result: any) {
 		super();
@@ -1008,8 +1021,6 @@ export class ApiException extends Error {
 		this.headers = headers;
 		this.result = result;
 	}
-
-	protected isApiException = true;
 
 	static isApiException(obj: any): obj is ApiException {
 		return obj.isApiException === true;

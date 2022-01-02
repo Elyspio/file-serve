@@ -2,22 +2,22 @@ import { useInjection } from "inversify-react";
 import { FilesService } from "../../../../core/services/files.service";
 import { DiKeysService } from "../../../../core/di/di.keys.service";
 import React from "react";
-import { Button, Grid, Menu, MenuItem, Popover, Typography, useTheme } from "@mui/material";
+import { Button, ClickAwayListener, Grid, Menu, MenuItem, Popover, Typography, useTheme } from "@mui/material";
 import { Folder, InsertDriveFile } from "@mui/icons-material";
 import { NodeElem } from "../../../../core/services/files.explorer.service";
 import { useAppSelector } from "../../../../store";
 import { useDispatch } from "react-redux";
 import { deleteFile } from "../../../../store/module/files/files.action";
 
-type NodeExplorerParams = { node: NodeElem; setCurrent: (node: NodeElem) => void; owner: "public" | "user" };
+type NodeExplorerParams = { node: NodeElem; setCurrent: (node: NodeElem) => void; owner: "public" | "user"; inline?: boolean };
 
-export function NodeExplorer({ node, setCurrent, owner }: NodeExplorerParams) {
+export function NodeExplorer({ node, setCurrent, owner, inline }: NodeExplorerParams) {
 	const services = {
 		files: useInjection<FilesService>(DiKeysService.files),
 	};
 
 	const click = React.useCallback(async () => {
-		if (node.type === "folder") setCurrent(node);
+		if (node.owner === "folder") setCurrent(node);
 		else {
 			await services.files[owner].download(node.data.id);
 		}
@@ -39,8 +39,10 @@ export function NodeExplorer({ node, setCurrent, owner }: NodeExplorerParams) {
 	} | null>(null);
 
 	const handleContextMenu = (event: React.MouseEvent) => {
-		if (node.type === "file") {
-			event.preventDefault();
+		event.preventDefault();
+		event.stopPropagation();
+		if (node.owner === "file") {
+			handlePopoverClose();
 			setContextMenu(
 				contextMenu === null
 					? {
@@ -62,21 +64,21 @@ export function NodeExplorer({ node, setCurrent, owner }: NodeExplorerParams) {
 	const dispatch = useDispatch();
 
 	const handleDelete = React.useCallback(() => {
-		if (node.type === "file") {
+		if (node.owner === "file") {
 			handleClose();
-			dispatch(deleteFile({ fileId: node.data.id, type: owner }));
+			dispatch(deleteFile({ fileId: node.data.id, owner: owner }));
 		}
 	}, [node, owner, dispatch, handleClose]);
 
 	const handleDownload = React.useCallback(async () => {
-		if (node.type === "file") {
+		if (node.owner === "file") {
 			handleClose();
 			await services.files[owner].download(node.data.id);
 		}
 	}, [node, owner, services.files, handleClose]);
 
 	const handleView = React.useCallback(async () => {
-		if (node.type === "file") {
+		if (node.owner === "file") {
 			handleClose();
 			// TODO JGD set in store the viewed element
 		}
@@ -89,55 +91,71 @@ export function NodeExplorer({ node, setCurrent, owner }: NodeExplorerParams) {
 	const logged = useAppSelector((s) => s.authentication.logged);
 
 	return (
-		<>
-			<Button onClick={click} color={"inherit"} sx={{ textTransform: "none" }} onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-				<Grid container direction={"column"} spacing={1} alignItems={"center"}>
-					<Grid item xs>
-						{node.type === "file" && <InsertDriveFile />}
-						{node.type === "folder" && <Folder />}
-					</Grid>
-					<Grid item onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose} xs>
-						<Typography maxWidth={"15ch"} noWrap variant={"body2"}>
-							{node.path}
-						</Typography>
-					</Grid>
-				</Grid>
-			</Button>
-			<Popover
-				id={"popover-title-node-explorer-" + node.path}
-				sx={{
-					pointerEvents: "none",
-				}}
-				open={open}
-				anchorEl={anchorEl}
-				anchorOrigin={{
-					vertical: "bottom",
-					horizontal: "left",
-				}}
-				transformOrigin={{
-					vertical: "top",
-					horizontal: "left",
-				}}
-				onClose={handlePopoverClose}
-				disableRestoreFocus
-			>
-				<Typography sx={{ p: 1 }}>{node.path}</Typography>
-			</Popover>
-			<Menu
-				open={contextMenu !== null}
-				onClose={handleClose}
-				anchorReference="anchorPosition"
-				anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
-			>
-				{logged && (
-					<MenuItem onClick={handleDelete} sx={{ color: theme.palette.error.main }}>
-						Delete
-					</MenuItem>
-				)}
+		<ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClose}>
+			<>
+				<Button onClick={click} color={"inherit"} sx={{ textTransform: "none", cursor: "contextMenu", width: "100%" }} onContextMenu={handleContextMenu}>
+					{inline ? (
+						<Grid container direction={"row"} flexWrap={"nowrap"} spacing={1}>
+							<Grid item xs={2}>
+								{node.owner === "file" && <InsertDriveFile sx={{ color: "lightgray" }} />}
+								{node.owner === "folder" && <Folder sx={{ color: "#F7D366" }} />}
+							</Grid>
+							<Grid item onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose} xs={10}>
+								<Typography textAlign={"left"} variant={"body2"}>
+									{node.path}
+								</Typography>
+							</Grid>
+						</Grid>
+					) : (
+						<Grid container direction={"column"} spacing={1} alignItems={"center"}>
+							<Grid item xs>
+								{node.owner === "file" && <InsertDriveFile sx={{ color: "lightgray" }} />}
+								{node.owner === "folder" && <Folder sx={{ color: "#F7D366" }} />}
+							</Grid>
+							<Grid item onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose} xs>
+								<Typography maxWidth={"15ch"} noWrap variant={"body2"}>
+									{node.path}
+								</Typography>
+							</Grid>
+						</Grid>
+					)}
+				</Button>
+				<Popover
+					id={"popover-title-node-explorer-" + node.path}
+					sx={{
+						pointerEvents: "none",
+					}}
+					open={open}
+					anchorEl={anchorEl}
+					anchorOrigin={{
+						vertical: "bottom",
+						horizontal: "left",
+					}}
+					transformOrigin={{
+						vertical: "top",
+						horizontal: "left",
+					}}
+					onClose={handlePopoverClose}
+					disableRestoreFocus
+				>
+					<Typography sx={{ p: 1 }}>{node.path}</Typography>
+				</Popover>
+				<Menu
+					open={contextMenu !== null}
+					onClose={handleClose}
+					anchorReference="anchorPosition"
+					anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+				>
+					{logged && (
+						<MenuItem onClick={handleDelete} sx={{ color: theme.palette.error.main }}>
+							Delete
+						</MenuItem>
+					)}
 
-				<MenuItem onClick={handleView}>View</MenuItem>
-				<MenuItem onClick={handleDownload}>Download</MenuItem>
-			</Menu>
-		</>
+					<MenuItem onClick={handleView}>View</MenuItem>
+					<MenuItem onClick={handleDownload}>Download</MenuItem>
+				</Menu>
+			</>
+		</ClickAwayListener>
 	);
 }

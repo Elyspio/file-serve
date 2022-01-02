@@ -1,13 +1,13 @@
-import { Box, Button, Container, Divider, Grid, IconButton, Paper } from "@mui/material";
+import { Box, Button, Container, Divider, DividerProps, Grid, Paper } from "@mui/material";
 import "./Files.scss";
 import * as React from "react";
-import { FileDetail } from "./detail/FileDetail";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { AddCircle, Replay } from "@mui/icons-material";
 import { Title } from "../utils/title";
 import { login } from "../../../store/module/authentication/authentication.action";
-import { FileModel } from "../../../core/apis/backend/generated";
 import { FilesExplorer } from "./explorer/FilesExplorer";
+import { VisualisationOptions } from "./explorer/VisualisationOptions";
+
+const Divide = (props: DividerProps) => <Divider {...props} sx={{ width: "100%", height: "1px", my: 2 }} light />;
 
 export const Files = () => {
 	const logged = useAppSelector((s) => s.authentication.logged);
@@ -17,40 +17,45 @@ export const Files = () => {
 
 	const redirectToLogin = React.useCallback(() => dispatch(login()), [dispatch]);
 
-	// endregion
-
 	return (
 		<Container className={"Files"}>
-			<Grid container spacing={4} direction={"row"} mt={2}>
+			<Grid container spacing={4} direction={"row"} my={2} height={"95%"}>
 				<Grid item xs={6}>
-					<Paper>
-						<Grid direction={"column"} alignItems={"center"} container>
+					<Paper sx={{ height: "100%" }}>
+						<Grid direction={"column"} alignItems={"center"} container height={"100%"}>
 							<Grid item>
 								<Title>Public files</Title>
 							</Grid>
-							<Divider sx={{ width: "100%", height: 1 }} light />
+							<Divide />
 							<Grid item container>
 								<FilesExplorer files={publicFiles} owner={"public"} />
 							</Grid>
+							<Grid item container sx={{ marginTop: "auto", py: 2 }}>
+								<Divide />
+								<VisualisationOptions owner={"public"} />
+							</Grid>
 						</Grid>
-
-						{/*<FileContainer user={false} title={"Public files"} add={addFile(false)} data={publicFiles} reload={reloadPublic} />*/}
 					</Paper>
 				</Grid>
 
 				<Grid item xs={6}>
-					<Paper>
+					<Paper sx={{ height: "100%" }}>
 						{logged ? (
 							<>
-								<Grid direction={"column"} alignItems={"center"} container>
+								<Grid direction={"column"} alignItems={"center"} container height={"100%"}>
 									<Grid item>
 										<Title>Your files</Title>
 									</Grid>
+									<Divide />
 									<Grid item container>
 										<FilesExplorer files={userFiles} owner={"user"} />
 									</Grid>
+
+									<Grid item container sx={{ marginTop: "auto" }}>
+										<Divide />
+										<VisualisationOptions owner={"user"} />
+									</Grid>
 								</Grid>
-								{/*<FileContainer user={true} title={"Your files"} add={addFile(true)} data={userFiles} reload={reloadUser} />*/}
 							</>
 						) : (
 							<Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
@@ -67,47 +72,3 @@ export const Files = () => {
 		</Container>
 	);
 };
-
-type FileContainerProps = {
-	data: FileModel[];
-	reload: () => any;
-	add: () => any;
-	user: boolean;
-	title: string;
-};
-
-function FileContainer({ add, reload, data, user, title }: FileContainerProps) {
-	const logged = useAppSelector((s) => s.authentication.logged);
-
-	return (
-		<Box width={"100%"} flexDirection={"column"} alignItems={"center"} className={"files-container"} justifyContent={"center"}>
-			<Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} px={2}>
-				<Box className={"file-header"} display={"flex"} alignItems={"center"} justifyContent={"space-between"} width={"100%"}>
-					<Title>{title}</Title>
-					<div className={"actions"}>
-						<IconButton onClick={reload} size="large">
-							<Replay />
-						</IconButton>
-						{logged && (
-							<IconButton onClick={add} size="large">
-								<AddCircle />
-							</IconButton>
-						)}
-					</div>
-				</Box>
-				{data.length > 0 && (
-					<Grid container direction={"column"} spacing={2}>
-						<Box marginTop={2}>
-							<Divider />
-						</Box>
-						{data.map((file) => (
-							<Grid item key={file.id}>
-								<FileDetail data={file} user={user} />
-							</Grid>
-						))}
-					</Grid>
-				)}
-			</Box>
-		</Box>
-	);
-}
