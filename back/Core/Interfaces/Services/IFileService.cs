@@ -12,7 +12,7 @@ public interface IFileService
     /// <summary>
     ///     Add a public file
     /// </summary>
-    Task<string> AddPublicFile(string filename, string mime, Stream content, string location);
+    Task<FileData> AddPublicFile(string filename, string mime, Stream content, string location);
 
     /// <summary>
     ///     Get content as byte array of a public file
@@ -50,7 +50,7 @@ public interface IFileService
     ///     Add a file for this user
     /// </summary>
     /// <returns>id of the created file</returns>
-    Task<string> AddUserFile(string username, string filename, string mime, Stream content, string location);
+    Task<FileData> AddUserFile(string username, string filename, string mime, Stream content, string location);
 
     /// <summary>
     ///     Get content as byte array of a file from an user

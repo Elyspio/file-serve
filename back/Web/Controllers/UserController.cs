@@ -32,15 +32,16 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(string), 201)]
+    [ProducesResponseType(typeof(FileModel), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required][FromForm] string filename, [Required][FromForm] string location, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required] [FromForm] string filename,
+        [Required] [FromForm] string location, [Required] IFormFile file)
     {
         var username = AuthUtility.GetUsername(Request);
         var stream = file.OpenReadStream();
-        var fileId = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
+        var created = await fileService.AddUserFile(username, filename, file.ContentType, stream, location);
         await stream.DisposeAsync();
-        return Created($"/files/user/{fileId}", fileId);
+        return Created($"/files/user/{created.Id}", created);
     }
 
     [HttpGet("{id}/binary")]
@@ -73,7 +74,7 @@ public class UsersController : ControllerBase
 
 
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(FileModel), 200)]
+    [Produces("application/json", Type = typeof(FileModel))]
     public async Task<IActionResult> GetFile([Required] string id)
     {
         var username = AuthUtility.GetUsername(Request);

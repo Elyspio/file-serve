@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Web.Assemblers;
 using Web.Filters;
 using Web.Models;
@@ -31,13 +32,16 @@ public class PublicController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(string), 201)]
+    [ProducesResponseType(typeof(FileModel), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required][FromForm] string location,  [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required] [FromForm] string filename,
+        [Required] [FromForm] string location, [Required] IFormFile file)
     {
         var stream = file.OpenReadStream();
-        var fileId = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
-        return Created($"/files/public/{fileId}", fileId);
+        var data = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
+        var model = assembler.Convert(data);
+        await stream.DisposeAsync();
+        return Created($"/files/public/{model.Id}", model);
     }
 
     [HttpGet("{id}/binary")]
@@ -62,7 +66,9 @@ public class PublicController : ControllerBase
     {
         var (content, mime) = await fileService.GetPublicFileContent(id);
         var stream = new MemoryStream(content);
-        return new FileStreamResult(stream, mime);
+        return new FileStreamResult(stream, new MediaTypeHeaderValue(mime))
+        {
+        };
     }
 
 

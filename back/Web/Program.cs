@@ -2,26 +2,26 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Adapters.Authentication;
 using Core.Utils;
-using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Web.Filters;
 using Web.Utils;
 
+var frontPath = Env.Get<string>("FRONT_PATH") ?? "/front";
+
 var useBuilder = () =>
 {
     var builder = WebApplication.CreateBuilder(args);
-
-    // Setup HTTP/3
     builder.WebHost.ConfigureKestrel((_, options) =>
     {
-        options.Listen(IPAddress.Any, 4003, _ =>
-        {
-        });
+        options.Listen(IPAddress.Any, 4003, _ => { });
         options.Limits.MaxRequestBodySize = long.MaxValue;
     });
 
+
+    // Setup CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("Cors",
@@ -35,24 +35,27 @@ var useBuilder = () =>
     });
 
 
+    // Inject Adapters
     var authenticationServerUrl = Env.Get<string>("AUTHENTICATION_SERVER_URI");
 
     builder.Services.AddHttpClient<IAuthenticationClient, AuthenticationClient>(client =>
     {
         var configuration = builder.Configuration;
+
         client.BaseAddress =
-            new Uri(authenticationServerUrl ?? $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
+            new Uri(authenticationServerUrl ??
+                    $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
     });
 
     builder.Services.AddHttpClient<IUsersClient, UsersClient>(client =>
     {
         var configuration = builder.Configuration;
         client.BaseAddress =
-            new Uri(authenticationServerUrl ?? $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
-
+            new Uri(authenticationServerUrl ??
+                    $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
     });
 
-
+    // Inject Services
     builder.Services.Scan(scan => scan
         .FromApplicationDependencies()
         .AddClasses(classes => classes.InNamespaces(
@@ -63,7 +66,7 @@ var useBuilder = () =>
         .AsImplementedInterfaces()
         .WithSingletonLifetime());
 
-
+    // Setup Logging
     builder.Host.UseSerilog((_, lc) => lc
         .Enrich.With(new CallerEnricher())
         .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
@@ -73,21 +76,32 @@ var useBuilder = () =>
             theme: AnsiConsoleTheme.Code
         )
     );
-    // Add services to the container.
 
-    builder.Services.AddControllers(o => o.Conventions.Add(new ControllerDocumentationConvention()))
-        .AddJsonOptions(x => { x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); }
-        );
+    // Convert Enum to String 
+    builder.Services
+        .AddControllers(o =>
+        {
+            o.Conventions.Add(new ControllerDocumentationConvention());
+            o.OutputFormatters.RemoveType<StringOutputFormatter>();
+        })
+        .AddJsonOptions(x => x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
-        c.CustomOperationIds(e =>
-            $"{e.ActionDescriptor.RouteValues["controller"]!.Replace(".", "")}{e.ActionDescriptor.RouteValues["action"]}");
+        c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
         // c.CustomSchemaIds(type => type.ToString());
         c.OperationFilter<RequireAuthAttribute.Swagger>();
     });
+
+
+    // Setup SPA Serving
+    if (builder.Environment.IsProduction())
+        Console.WriteLine($"Server in production, serving SPA from {frontPath} folder");
+
+    // builder.Services.AddSpaStaticFiles(configuration => { configuration.RootPath = frontPath; });
+
 
     return builder;
 };
@@ -101,23 +115,32 @@ var useApp = (WebApplication application) =>
 {
     application.UseSwagger();
     application.UseSwaggerUI();
+
+    // Start Dependency Injection
     application.UseAdvancedDependencyInjection();
 
+    // Allow CORS
     application.UseCors("Cors");
 
+    // Setup Controllers
     application.MapControllers();
 
-
+    // Start SPA serving
     if (application.Environment.IsProduction())
     {
-        application.UseStaticFiles(new StaticFileOptions
+        //app.UseSpa(spa =>
+        //{
+        //    spa.Options.SourcePath = frontPath;
+
+        //});
+        application.UseDefaultFiles(new DefaultFilesOptions
         {
-            FileProvider = new PhysicalFileProvider(Env.Get<string>("FRONT_PATH", true)!),
-            RequestPath = "/"
+            DefaultFileNames = new List<string> { "index.html" }
         });
+        application.UseStaticFiles();
     }
 
-
+    // Start the application
     application.Run();
 };
 

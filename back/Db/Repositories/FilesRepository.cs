@@ -1,6 +1,4 @@
-﻿using System;
-using Core.Exceptions;
-using Core.Interfaces.Repositories;
+﻿using Core.Interfaces.Repositories;
 using Core.Models;
 using Db.Assemblers;
 using Db.Entities;
@@ -10,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using FileNotFoundException = Core.Exceptions.FileNotFoundException;
 
 namespace Db.Repositories;
 
@@ -34,7 +33,7 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
         var files = await EntityCollection
             .Find(file => file.Username == username)
             .ToListAsync();
-        
+
         return assembler.Convert(files).ToList();
     }
 
@@ -53,7 +52,7 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
         var idGridFs = await gridFsBucket.UploadFromStreamAsync(file.Id.ToString(), content);
 
         file.IdGridFs = idGridFs;
-        
+
         await EntityCollection.ReplaceOneAsync(f => f.Id == file.Id, file);
 
         return assembler.Convert(file);
@@ -61,7 +60,7 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
 
     public async Task<byte[]> GetFileContent(string username, string id)
     {
-        var file = await this.GetFile(username, id);
+        var file = await GetFile(username, id);
 
         return await gridFsBucket.DownloadAsBytesByNameAsync(file.Id);
     }
@@ -73,14 +72,14 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
             .ToListAsync();
 
 
-        if (!files.Any()) throw new Core.Exceptions.FileNotFoundException(username, id);
-        
+        if (!files.Any()) throw new FileNotFoundException(username, id);
+
         return assembler.Convert(files.First());
     }
 
     public async Task DeleteFile(string username, string id)
     {
-        var file = await this.GetFile(username, id);
+        var file = await GetFile(username, id);
         await gridFsBucket.DeleteAsync(new ObjectId(file.IdGridFs));
         await EntityCollection.FindOneAndDeleteAsync(f => f.Id == new ObjectId(file.Id));
     }

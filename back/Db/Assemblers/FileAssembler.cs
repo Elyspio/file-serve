@@ -23,6 +23,7 @@ public class FileAssembler : BaseAssembler<FileData, FileEntity>
 
     public override FileData Convert(FileEntity obj)
     {
-        return new FileData(obj.Id.ToString(), obj.Filename, obj.Username, obj.Mime, obj.IdGridFs.ToString(), obj.Size, obj.Location);
+        return new FileData(obj.Id.ToString(), obj.Filename, obj.Username, obj.Mime, obj.IdGridFs.ToString(), obj.Size,
+            obj.Location);
     }
 }

@@ -10,13 +10,10 @@ public class Env
         if (env != null)
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            return (T) converter.ConvertFromString(env)!;
+            return (T)converter.ConvertFromString(env)!;
         }
 
-        if (required)
-        {
-            throw new Exception($"The environment variable {variableName} is null");
-        }
+        if (required) throw new Exception($"The environment variable {variableName} is null");
 
         return default;
     }

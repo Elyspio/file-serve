@@ -77,7 +77,7 @@ public class RequireAuthAttribute : ActionFilterAttribute
             {
                 Name = AuthenticationTokenField,
                 In = ParameterLocation.Cookie,
-                Required = false,
+                Required = false
             });
 
             operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
