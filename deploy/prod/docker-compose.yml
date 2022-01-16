@@ -14,7 +14,7 @@ services:
             DB_DATABASE: ${DB_DATABASE}
         networks:
             - external
-            - file-serve-network
+            - file-serve
         labels:
             - "traefik.enable=true"
             - "traefik.docker.network=external"
@@ -37,12 +37,13 @@ services:
             - "27017:27017"
         networks:
             - internal
-            - file-serve-network
+            - file-serve
         volumes:
             - "./db:/data/db"
 
 networks:
-    file-serve-network:
+    file-serve:
+        name: file-serve
     internal:
         external: true
     external:

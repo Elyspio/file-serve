@@ -9,8 +9,8 @@ using Web.Utils;
 namespace Web.Controllers;
 
 [ApiController]
-[Route("files/user", Name = "Users")]
 [RequireAuth]
+[Route("files/user", Name = "UserFiles")]
 public class UsersController : ControllerBase
 {
     private readonly FileAssembler assembler;
@@ -69,7 +69,8 @@ public class UsersController : ControllerBase
         var username = AuthUtility.GetUsername(Request);
         var (content, mime) = await fileService.GetUserFileContent(username, id);
         var stream = new MemoryStream(content);
-        return new FileStreamResult(stream, mime);
+
+        return new FileStreamResult(stream, mime) { EnableRangeProcessing = true};
     }
 
 

@@ -11,8 +11,11 @@ using Web.Utils;
 
 var frontPath = Env.Get<string>("FRONT_PATH") ?? "/front";
 
+AppContext.SetSwitch("Switch.Microsoft.AspNetCore.Mvc.EnableRangeProcessing", true);
+
 var useBuilder = () =>
 {
+
     var builder = WebApplication.CreateBuilder(args);
     builder.WebHost.ConfigureKestrel((_, options) =>
     {
@@ -21,11 +24,11 @@ var useBuilder = () =>
     });
 
 
+
     // Setup CORS
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy("Cors",
-            b =>
+        options.AddPolicy("Cors", b =>
             {
                 b.AllowCredentials();
                 b.SetIsOriginAllowed(origin => origin.Contains("localhost"));
@@ -139,6 +142,8 @@ var useApp = (WebApplication application) =>
         });
         application.UseStaticFiles();
     }
+
+
 
     // Start the application
     application.Run();

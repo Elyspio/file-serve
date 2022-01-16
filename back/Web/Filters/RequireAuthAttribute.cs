@@ -70,14 +70,26 @@ public class RequireAuthAttribute : ActionFilterAttribute
             {
                 Name = AuthenticationTokenField,
                 In = ParameterLocation.Header,
-                Required = false
+                Required = false,
+                AllowEmptyValue = true,
+                Description = "Authentication Token",
+                Schema = new OpenApiSchema
+                {
+                    Type = "string"
+                }
             });
 
             operation.Parameters.Add(new OpenApiParameter
             {
                 Name = AuthenticationTokenField,
                 In = ParameterLocation.Cookie,
-                Required = false
+                Required = false,
+                AllowEmptyValue = true,
+                Description = "Authentication Token",
+                Schema = new OpenApiSchema
+                {
+                    Type = "string"
+                }
             });
 
             operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });

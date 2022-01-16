@@ -9,7 +9,7 @@ using Web.Models;
 namespace Web.Controllers;
 
 [ApiController]
-[Route("files/public", Name = "Public")]
+[Route("files/public", Name = "PublicFiles")]
 public class PublicController : ControllerBase
 {
     private readonly FileAssembler assembler;
@@ -66,9 +66,7 @@ public class PublicController : ControllerBase
     {
         var (content, mime) = await fileService.GetPublicFileContent(id);
         var stream = new MemoryStream(content);
-        return new FileStreamResult(stream, new MediaTypeHeaderValue(mime))
-        {
-        };
+        return new FileStreamResult(stream, mime) { EnableRangeProcessing = true };
     }
 
 
