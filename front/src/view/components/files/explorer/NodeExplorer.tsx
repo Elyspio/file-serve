@@ -7,7 +7,7 @@ import { Folder, InsertDriveFile } from "@mui/icons-material";
 import { NodeElem } from "../../../../core/services/files.explorer.service";
 import { useAppSelector } from "../../../../store";
 import { useDispatch } from "react-redux";
-import { deleteFile } from "../../../../store/module/files/files.action";
+import { deleteFile, deleteFolder } from "../../../../store/module/files/files.action";
 
 type NodeExplorerParams = { node: NodeElem; setCurrent: (node: NodeElem) => void; owner: "public" | "user"; inline?: boolean };
 
@@ -67,6 +67,8 @@ export function NodeExplorer({ node, setCurrent, owner, inline }: NodeExplorerPa
 		if (node.owner === "file") {
 			handleClose();
 			dispatch(deleteFile({ fileId: node.data.id, owner: owner }));
+		} else {
+			dispatch(deleteFolder({ owner, path: node.path }));
 		}
 	}, [node, owner, dispatch, handleClose]);
 
