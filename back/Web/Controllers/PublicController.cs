@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using Web.Assemblers;
 using Web.Filters;
 using Web.Models;
@@ -66,7 +65,7 @@ public class PublicController : ControllerBase
     {
         var (content, mime) = await fileService.GetPublicFileContent(id);
         var stream = new MemoryStream(content);
-        return new FileStreamResult(stream, mime) { EnableRangeProcessing = true };
+        return new FileStreamResult(stream, mime) {EnableRangeProcessing = true};
     }
 
 

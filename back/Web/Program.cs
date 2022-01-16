@@ -15,7 +15,6 @@ AppContext.SetSwitch("Switch.Microsoft.AspNetCore.Mvc.EnableRangeProcessing", tr
 
 var useBuilder = () =>
 {
-
     var builder = WebApplication.CreateBuilder(args);
     builder.WebHost.ConfigureKestrel((_, options) =>
     {
@@ -24,17 +23,16 @@ var useBuilder = () =>
     });
 
 
-
     // Setup CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("Cors", b =>
-            {
-                b.AllowCredentials();
-                b.SetIsOriginAllowed(origin => origin.Contains("localhost"));
-                b.AllowAnyHeader();
-                b.AllowAnyMethod();
-            });
+        {
+            b.AllowCredentials();
+            b.SetIsOriginAllowed(origin => origin.Contains("localhost"));
+            b.AllowAnyHeader();
+            b.AllowAnyMethod();
+        });
     });
 
 
@@ -138,11 +136,10 @@ var useApp = (WebApplication application) =>
         //});
         application.UseDefaultFiles(new DefaultFilesOptions
         {
-            DefaultFileNames = new List<string> { "index.html" }
+            DefaultFileNames = new List<string> {"index.html"}
         });
         application.UseStaticFiles();
     }
-
 
 
     // Start the application
