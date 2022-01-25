@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using Web.Assemblers;
 using Web.Filters;
 using Web.Models;
@@ -8,10 +8,11 @@ using Web.Models;
 namespace Web.Controllers;
 
 [ApiController]
-[Route("files/public", Name = "PublicFiles")]
+[Route("api/files/public", Name = "PublicFiles")]
 public class PublicController : ControllerBase
 {
     private readonly FileAssembler assembler;
+    private readonly Dictionary<string, (MemoryStream stream, string mime, string filename)> streams = new();
 
 
     private readonly IFileService fileService;
@@ -33,8 +34,8 @@ public class PublicController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(FileModel), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required] [FromForm] string filename,
-        [Required] [FromForm] string location, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required][FromForm] string filename,
+        [Required][FromForm] string location, [Required] IFormFile file)
     {
         var stream = file.OpenReadStream();
         var data = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
@@ -59,13 +60,14 @@ public class PublicController : ControllerBase
         return Ok(content);
     }
 
+
     [HttpGet("{id}/stream")]
-    [ProducesResponseType(typeof(FileStreamResult), 206, "application/octet-stream")]
+    [ProducesResponseType(typeof(byte[]), 200, "application/octet-stream")]
+    [ProducesResponseType(typeof(byte[]), 206, "application/octet-stream")]
     public async Task<IActionResult> GetFileContentAsStream([Required] string id)
     {
-        var (content, mime) = await fileService.GetPublicFileContent(id);
-        var stream = new MemoryStream(content);
-        return new FileStreamResult(stream, mime) {EnableRangeProcessing = true};
+        var stream = await fileService.GetPublicFileContentAsStream(id);
+        return new FileStreamResult(stream, "application/octet-stream") { EnableRangeProcessing = true };
     }
 
 

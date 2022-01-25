@@ -1,7 +1,7 @@
-﻿using System.Text;
-using Core.Interfaces.Repositories;
+﻿using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;
+using System.Text;
 
 namespace Core.Services;
 
@@ -35,6 +35,13 @@ internal class FileService : IFileService
     {
         return await GetUserFileContentAsString(PublicUser, id);
     }
+
+
+    public async Task<Stream> GetPublicFileContentAsStream(string id)
+    {
+        return await GetUserFileContentAsStream(PublicUser, id);
+    }
+
 
     public async Task<FileData> GetPublicFile(string id)
     {
@@ -78,5 +85,10 @@ internal class FileService : IFileService
     public async Task DeleteUserFile(string username, string id)
     {
         await repository.DeleteFile(username, id);
+    }
+
+    public async Task<Stream> GetUserFileContentAsStream(string username, string id)
+    {
+        return await repository.GetFileContentAsStream(username, id);
     }
 }

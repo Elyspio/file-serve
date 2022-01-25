@@ -65,6 +65,19 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
         return await gridFsBucket.DownloadAsBytesByNameAsync(file.Id);
     }
 
+    public async Task<Stream> GetFileContentAsStream(string username, string id)
+    {
+        var file = await GetFile(username, id);
+
+        var outputStream = new MemoryStream();
+
+        await gridFsBucket.DownloadToStreamByNameAsync(file.Id, outputStream);
+
+        return outputStream;
+    }
+
+
+
     public async Task<FileData> GetFile(string username, string id)
     {
         var files = await EntityCollection

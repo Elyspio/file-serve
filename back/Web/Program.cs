@@ -1,11 +1,10 @@
-using System.Net;
-using System.Text.Json.Serialization;
 using Adapters.Authentication;
 using Core.Utils;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using System.Net;
 using Web.Filters;
 using Web.Utils;
 
@@ -85,7 +84,7 @@ var useBuilder = () =>
             o.Conventions.Add(new ControllerDocumentationConvention());
             o.OutputFormatters.RemoveType<StringOutputFormatter>();
         })
-        .AddJsonOptions(x => x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        .AddNewtonsoftJson(x => x.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter()));
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -136,7 +135,7 @@ var useApp = (WebApplication application) =>
         //});
         application.UseDefaultFiles(new DefaultFilesOptions
         {
-            DefaultFileNames = new List<string> {"index.html"}
+            DefaultFileNames = new List<string> { "index.html" }
         });
         application.UseStaticFiles();
     }

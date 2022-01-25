@@ -1,6 +1,7 @@
-using System.ComponentModel.DataAnnotations;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using Web.Assemblers;
 using Web.Filters;
 using Web.Models;
@@ -10,7 +11,7 @@ namespace Web.Controllers;
 
 [ApiController]
 [RequireAuth]
-[Route("files/user", Name = "UserFiles")]
+[Route("api/files/user", Name = "UserFiles")]
 public class UsersController : ControllerBase
 {
     private readonly FileAssembler assembler;
@@ -35,8 +36,8 @@ public class UsersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(FileModel), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required] [FromForm] string filename,
-        [Required] [FromForm] string location, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required][FromForm] string filename,
+        [Required][FromForm] string location, [Required] IFormFile file)
     {
         var username = AuthUtility.GetUsername(Request);
         var stream = file.OpenReadStream();
@@ -64,19 +65,13 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}/stream")]
+    [ProducesResponseType(typeof(FileStreamResult), 200, "application/octet-stream")]
     [ProducesResponseType(typeof(FileStreamResult), 206, "application/octet-stream")]
     public async Task<IActionResult> GetFileContentAsStream([Required] string id)
     {
-        if (!streams.ContainsKey(id))
-        {
-            var username = AuthUtility.GetUsername(Request);
-            var video = await fileService.GetUserFile(username, id);
-            var (content, mime) = await fileService.GetUserFileContent(username, id);
-            var stream = new MemoryStream(content);
-            streams[id] = (stream, mime, video.Filename);
-        }
-
-        return new FileStreamResult(streams[id].stream, streams[id].mime) {EnableRangeProcessing = true};
+        var username = AuthUtility.GetUsername(Request);
+        var stream = await fileService.GetUserFileContentAsStream(username, id);
+        return new FileStreamResult(stream, "application/octet-stream") { EnableRangeProcessing = true };
     }
 
 

@@ -26,6 +26,16 @@ public interface IFileService
     /// <param name="id">file id</param>
     Task<string> GetPublicFileContentAsString(string id);
 
+
+    /// <summary>
+    ///     Get content as stream (utf8) of a public file
+    /// </summary>
+    /// <param name="username">user's id</param>
+    /// <param name="id">file id</param>
+    Task<Stream> GetPublicFileContentAsStream(string id);
+
+
+
     /// <summary>
     ///     Get metadata of a public file
     /// </summary>
@@ -65,6 +75,14 @@ public interface IFileService
     /// <param name="username">user's id</param>
     /// <param name="id">file id</param>
     Task<string> GetUserFileContentAsString(string username, string id);
+
+
+    /// <summary>
+    ///     Get content as stream (utf8) of a file from an user
+    /// </summary>
+    /// <param name="username">user's id</param>
+    /// <param name="id">file id</param>
+    Task<Stream> GetUserFileContentAsStream(string username, string id);
 
     /// <summary>
     ///     Get metadata of a file from an user
