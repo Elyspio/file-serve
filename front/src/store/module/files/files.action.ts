@@ -10,7 +10,8 @@ import { StoreState } from "../../index";
 const service = container.get<FilesService>(DiKeysService.files);
 
 export const getFiles = createAsyncThunk("files/getUserFiles", async (type: FileOwner) => {
-	return { data: await service[type].list(), owner: type };
+	const { data } = await service[type].list();
+	return { data, owner: type };
 });
 
 export const addFile = createAsyncThunk("files/addFile", async (params: { owner: FileOwner; filename: string; location: string; file: File }, { dispatch }) => {
