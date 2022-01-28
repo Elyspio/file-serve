@@ -12,7 +12,7 @@ namespace Web.Controllers;
 public class PublicController : ControllerBase
 {
     private readonly FileAssembler assembler;
-    private readonly Dictionary<string, (MemoryStream stream, string mime, string filename)> streams = new();
+    private readonly Dictionary<string, Stream> streams = new();
 
 
     private readonly IFileService fileService;
@@ -66,7 +66,16 @@ public class PublicController : ControllerBase
     [ProducesResponseType(typeof(byte[]), 206, "application/octet-stream")]
     public async Task<IActionResult> GetFileContentAsStream([Required] string id)
     {
-        var stream = await fileService.GetPublicFileContentAsStream(id);
+        Stream stream;
+        if (streams.ContainsKey(id))
+        {
+            stream = streams[id];
+        }
+        else
+        {
+            stream = await fileService.GetPublicFileContentAsStream(id);
+            streams.Add(id, stream);
+        }
         return new FileStreamResult(stream, "application/octet-stream") { EnableRangeProcessing = true };
     }
 

@@ -16,7 +16,7 @@ public class UsersController : ControllerBase
 {
     private readonly FileAssembler assembler;
     private readonly IFileService fileService;
-    private readonly Dictionary<string, (MemoryStream stream, string mime, string filename)> streams = new();
+    private readonly Dictionary<string, Stream> streams = new();
 
     public UsersController(IFileService fileService)
     {
@@ -69,10 +69,19 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(FileStreamResult), 206, "application/octet-stream")]
     public async Task<IActionResult> GetFileContentAsStream([Required] string id)
     {
-        var username = AuthUtility.GetUsername(Request);
-        var stream = await fileService.GetUserFileContentAsStream(username, id);
+        Stream stream;
+        if(streams.ContainsKey(id))
+        {
+            stream = streams[id];
+        }
+        else
+        {
+            var username = AuthUtility.GetUsername(Request);
+            stream = await fileService.GetUserFileContentAsStream(username, id);
+            streams.Add(id, stream);
+        }
         return new FileStreamResult(stream, "application/octet-stream") { EnableRangeProcessing = true };
-    }
+    } 
 
 
     [HttpGet("{id}")]
