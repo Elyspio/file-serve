@@ -86,6 +86,13 @@ export function NodeExplorer({ node, setCurrent, owner, inline }: NodeExplorerPa
 		}
 	}, [node, handleClose]);
 
+	const handleGetLink = React.useCallback(async () => {
+		if (node.owner === "file") {
+			await services.files.public.getLink(node.data.id);
+		}
+		handleClose();
+	}, [node, handleClose, services.files]);
+
 	const open = Boolean(anchorEl);
 
 	const theme = useTheme();
@@ -156,6 +163,7 @@ export function NodeExplorer({ node, setCurrent, owner, inline }: NodeExplorerPa
 
 					<MenuItem onClick={handleView}>View</MenuItem>
 					<MenuItem onClick={handleDownload}>Download</MenuItem>
+					<MenuItem onClick={handleGetLink}>Get Link</MenuItem>
 				</Menu>
 			</>
 		</ClickAwayListener>

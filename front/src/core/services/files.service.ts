@@ -23,6 +23,7 @@ export class FilesService {
 		getContentAsString: this.getContentAsStringPublic.bind(this),
 		list: this.listPublic.bind(this),
 		get: this.getPublic.bind(this),
+		getLink: this.getLinkPublic.bind(this),
 	};
 	public user = {
 		add: this.addUser.bind(this),
@@ -32,13 +33,26 @@ export class FilesService {
 		getContentAsString: this.getContentAsStringUser.bind(this),
 		list: this.listUser.bind(this),
 		get: this.getUser.bind(this),
+		getLink: this.getLinkUser.bind(this),
 	};
 	@inject(DiKeysApi.backend)
 	private backendApi!: BackendApi;
 
+	@ToastOn({ success: "Link copied to your clipboard", error: "Could not get the file's url" })
+	private async getLinkPublic(id: string) {
+		const url = `${window.config.endpoints.core}/api/files/public/${id}/binary`;
+		await navigator.clipboard.writeText(url);
+	}
+
+	@ToastOn({ success: "Link copied to your clipboard", error: "Could not get the file's url" })
+	private async getLinkUser(id: string) {
+		const url = `${window.config.endpoints.core}/api/files/user/${id}/binary`;
+		await navigator.clipboard.writeText(url);
+	}
+
 	@ToastOn({ error: "Could not add the public file" }, { concatArgs: ["filename"] })
 	private async addPublic(filename: string, location: string, file: File) {
-		return this.backendApi.clients.files.public.addFile(filename, location, { fileName: filename, data: file });
+		return this.backendApi.clients.files.public.addFile(filename, location, file);
 	}
 
 	@ToastOn({ error: "Could not delete the public file" }, { concatArgs: true })
@@ -75,7 +89,7 @@ export class FilesService {
 
 	@ToastOn({ error: "Could not add your file" }, { concatArgs: ["filename"] })
 	private async addUser(filename: string, location: string, file: File) {
-		return this.backendApi.clients.files.user.addFile(filename, location, { fileName: filename, data: file });
+		return this.backendApi.clients.files.user.addFile(filename, location, file);
 	}
 
 	@ToastOn({ error: "Could not delete your file" }, { concatArgs: true })
