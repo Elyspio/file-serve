@@ -1,7 +1,7 @@
 ﻿using Adapters.Authentication;
-using Core.Interfaces.Services;
+using FileServe.Api.Abstractions.Interfaces.Services;
 
-namespace Core.Services;
+namespace FileServe.Api.Core.Services;
 
 internal class AuthenticationService : IAuthenticationService
 {

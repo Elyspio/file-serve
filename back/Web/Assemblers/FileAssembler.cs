@@ -1,8 +1,8 @@
-﻿using Core.Interfaces.Assemblers;
-using Core.Models;
-using Web.Models;
+﻿using FileServe.Api.Abstractions.Common.Assemblers;
+using FileServe.Api.Abstractions.Transports;
+using FileServe.Api.Web.Models;
 
-namespace Web.Assemblers;
+namespace FileServe.Api.Web.Assemblers;
 
 public class FileAssembler : BaseAssembler<FileData, FileModel>
 {

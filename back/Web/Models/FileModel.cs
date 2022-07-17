@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Web.Models;
+namespace FileServe.Api.Web.Models;
 
 public class FileModel
 {

@@ -1,4 +1,4 @@
-﻿namespace Web.Utils;
+﻿namespace FileServe.Api.Web.Utils;
 
 public class AuthUtility
 {

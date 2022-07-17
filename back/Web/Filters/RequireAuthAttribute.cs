@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FileServe.Api.Abstractions.Interfaces.Services;
+using FileServe.Api.Web.Utils;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using Web.Utils;
-using IAuthenticationService = Core.Interfaces.Services.IAuthenticationService;
 
-namespace Web.Filters;
+namespace FileServe.Api.Web.Filters;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequireAuthAttribute : ActionFilterAttribute
@@ -13,9 +13,7 @@ public class RequireAuthAttribute : ActionFilterAttribute
     private const string AuthenticationTokenField = "authentication-token";
 
 
-    public override async Task OnActionExecutionAsync(
-        ActionExecutingContext context,
-        ActionExecutionDelegate next)
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var authenticationService = context.HttpContext.RequestServices.GetService<IAuthenticationService>();
 
@@ -60,40 +58,48 @@ public class RequireAuthAttribute : ActionFilterAttribute
             var attributes = context.MethodInfo.CustomAttributes.ToList();
 
             // Add class' attributes
-            if (info.DeclaringType != null) attributes.AddRange(info.DeclaringType.CustomAttributes);
+            if (info.DeclaringType != null)
+            {
+                attributes.AddRange(info.DeclaringType.CustomAttributes);
+            }
 
-            if (attributes.All(attribute => attribute.AttributeType != typeof(RequireAuthAttribute))) return;
+            if (attributes.All(attribute => attribute.AttributeType != typeof(RequireAuthAttribute)))
+            {
+                return;
+            }
 
             operation.Parameters ??= new List<OpenApiParameter>();
 
             operation.Parameters.Add(new OpenApiParameter
-            {
-                Name = AuthenticationTokenField,
-                In = ParameterLocation.Header,
-                Required = false,
-                AllowEmptyValue = true,
-                Description = "Authentication Token",
-                Schema = new OpenApiSchema
                 {
-                    Type = "string"
+                    Name = AuthenticationTokenField,
+                    In = ParameterLocation.Header,
+                    Required = false,
+                    AllowEmptyValue = true,
+                    Description = "Authentication Token",
+                    Schema = new OpenApiSchema
+                    {
+                        Type = "string"
+                    }
                 }
-            });
+            );
 
             operation.Parameters.Add(new OpenApiParameter
-            {
-                Name = AuthenticationTokenField,
-                In = ParameterLocation.Cookie,
-                Required = false,
-                AllowEmptyValue = true,
-                Description = "Authentication Token",
-                Schema = new OpenApiSchema
                 {
-                    Type = "string"
+                    Name = AuthenticationTokenField,
+                    In = ParameterLocation.Cookie,
+                    Required = false,
+                    AllowEmptyValue = true,
+                    Description = "Authentication Token",
+                    Schema = new OpenApiSchema
+                    {
+                        Type = "string"
+                    }
                 }
-            });
+            );
 
-            operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
-            operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+            operation.Responses.Add("401", new OpenApiResponse {Description = "Unauthorized"});
+            operation.Responses.Add("403", new OpenApiResponse {Description = "Forbidden"});
         }
     }
 }

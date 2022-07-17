@@ -5,16 +5,11 @@ services:
         image: elyspio/file-serve
         volumes:
             - "./config/front/conf.js:/back/wwwroot/conf.js"
-        environment:
-            AUTHENTICATION_SERVER_URI: "https://elyspio.fr/authentication/"
-            DB_PASSWORD: ${DB_PASSWORD}
-            DB_HOST: ${DB_HOST}
-            DB_USERNAME: ${DB_USERNAME}
-            DB_PORT: ${DB_PORT}
-            DB_DATABASE: ${DB_DATABASE}
+            - "./config/back/appsettings.docker.json:/back/appsettings.docker.json"
         networks:
             - external
             - file-serve
+            - authentication
         labels:
             - "traefik.enable=true"
             - "traefik.docker.network=external"
@@ -23,28 +18,11 @@ services:
             - "traefik.http.routers.file-serve.rule=PathPrefix(`/files`)"
             - "traefik.http.services.file-serve.loadbalancer.server.port=4003"
             - "traefik.http.routers.file-serve.entrypoints=external"
-        depends_on:
-            - file-serve-db
-
-    file-serve-db:
-        container_name: file-serve-db
-        image: mongo:latest
-        restart: always
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
-            MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
-        ports:
-            - "27017:27017"
-        networks:
-            - internal
-            - file-serve
-        volumes:
-            - "./db:/data/db"
 
 networks:
     file-serve:
         name: file-serve
-    internal:
-        external: true
     external:
+        external: true
+    authentication:
         external: true

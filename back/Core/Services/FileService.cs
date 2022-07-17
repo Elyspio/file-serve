@@ -1,13 +1,17 @@
-﻿using Core.Interfaces.Repositories;
-using Core.Interfaces.Services;
-using Core.Models;
-using System.Text;
+﻿using System.Text;
+using FileServe.Api.Abstractions.Interfaces.Repositories;
+using FileServe.Api.Abstractions.Interfaces.Services;
+using FileServe.Api.Abstractions.Transports;
+using FileServe.Api.Core.Assemblers;
 
-namespace Core.Services;
+namespace FileServe.Api.Core.Services;
 
 internal class FileService : IFileService
 {
     private const string PublicUser = "public";
+
+    private FileAssembler fileAssembler = new();
+
 
     private readonly IFilesRepository repository;
 
@@ -55,13 +59,12 @@ internal class FileService : IFileService
 
     public async Task<List<FileData>> GetUserFiles(string username)
     {
-        return await repository.GetFiles(username);
+        return fileAssembler.Convert(await repository.GetFiles(username));
     }
 
-    public async Task<FileData> AddUserFile(string username, string filename, string mime, Stream content,
-        string location)
+    public async Task<FileData> AddUserFile(string username, string filename, string mime, Stream content, string location)
     {
-        return await repository.AddFile(username, filename, mime, content, location);
+        return fileAssembler.Convert(await repository.AddFile(username, filename, mime, content, location));
     }
 
     public async Task<(byte[], string)> GetUserFileContent(string username, string id)
@@ -79,7 +82,7 @@ internal class FileService : IFileService
 
     public async Task<FileData> GetUserFile(string username, string id)
     {
-        return await repository.GetFile(username, id);
+        return fileAssembler.Convert(await repository.GetFile(username, id));
     }
 
     public async Task DeleteUserFile(string username, string id)

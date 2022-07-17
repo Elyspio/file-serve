@@ -1,13 +1,12 @@
-using Core.Interfaces.Services;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using Web.Assemblers;
-using Web.Filters;
-using Web.Models;
-using Web.Utils;
+using FileServe.Api.Abstractions.Interfaces.Services;
+using FileServe.Api.Web.Assemblers;
+using FileServe.Api.Web.Filters;
+using FileServe.Api.Web.Models;
+using FileServe.Api.Web.Utils;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Web.Controllers;
+namespace FileServe.Api.Web.Controllers;
 
 [ApiController]
 [RequireAuth]
@@ -36,8 +35,7 @@ public class UsersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(FileModel), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required][FromForm] string filename,
-        [Required][FromForm] string location, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required] [FromForm] string location, [Required] IFormFile file)
     {
         var username = AuthUtility.GetUsername(Request);
         var stream = file.OpenReadStream();
@@ -70,7 +68,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetFileContentAsStream([Required] string id)
     {
         Stream stream;
-        if(streams.ContainsKey(id))
+        if (streams.ContainsKey(id))
         {
             stream = streams[id];
         }
@@ -80,8 +78,9 @@ public class UsersController : ControllerBase
             stream = await fileService.GetUserFileContentAsStream(username, id);
             streams.Add(id, stream);
         }
-        return new FileStreamResult(stream, "application/octet-stream") { EnableRangeProcessing = true };
-    } 
+
+        return new FileStreamResult(stream, "application/octet-stream") {EnableRangeProcessing = true};
+    }
 
 
     [HttpGet("{id}")]

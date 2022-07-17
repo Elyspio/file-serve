@@ -1,21 +1,21 @@
-using Core.Interfaces.Services;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Web.Assemblers;
-using Web.Filters;
-using Web.Models;
+using FileServe.Api.Abstractions.Interfaces.Services;
+using FileServe.Api.Web.Assemblers;
+using FileServe.Api.Web.Filters;
+using FileServe.Api.Web.Models;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Web.Controllers;
+namespace FileServe.Api.Web.Controllers;
 
 [ApiController]
 [Route("api/files/public", Name = "PublicFiles")]
 public class PublicController : ControllerBase
 {
     private readonly FileAssembler assembler;
-    private readonly Dictionary<string, Stream> streams = new();
 
 
     private readonly IFileService fileService;
+    private readonly Dictionary<string, Stream> streams = new();
 
     public PublicController(IFileService fileService)
     {
@@ -34,8 +34,7 @@ public class PublicController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(FileModel), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required][FromForm] string filename,
-        [Required][FromForm] string location, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required] [FromForm] string location, [Required] IFormFile file)
     {
         var stream = file.OpenReadStream();
         var data = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
@@ -76,7 +75,8 @@ public class PublicController : ControllerBase
             stream = await fileService.GetPublicFileContentAsStream(id);
             streams.Add(id, stream);
         }
-        return new FileStreamResult(stream, "application/octet-stream") { EnableRangeProcessing = true };
+
+        return new FileStreamResult(stream, "application/octet-stream") {EnableRangeProcessing = true};
     }
 
 

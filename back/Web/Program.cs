@@ -1,117 +1,100 @@
-using Adapters.Authentication;
-using Core.Utils;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 using System.Net;
-using Web.Filters;
-using Web.Utils;
+using FileServe.Api.Abstractions.Common.Helpers;
+using FileServe.Api.Abstractions.Interfaces.Injections;
+using FileServe.Api.Adapters.Injections;
+using FileServe.Api.Core.Injections;
+using FileServe.Api.Db.Injections;
+using FileServe.Api.Web.Filters;
+using FileServe.Api.Web.Utils;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
 
-var frontPath = Env.Get<string>("FRONT_PATH") ?? "/front";
-
+var frontPath = Env.Get("FRONT_PATH", "/front");
+const string appPath = "/files";
 AppContext.SetSwitch("Switch.Microsoft.AspNetCore.Mvc.EnableRangeProcessing", true);
 
-var useBuilder = () =>
+WebApplicationBuilder UseBuilder()
 {
     var builder = WebApplication.CreateBuilder(args);
-    builder.WebHost.ConfigureKestrel((_, options) =>
-    {
-        options.Listen(IPAddress.Any, 4003, _ => { });
-        options.Limits.MaxRequestBodySize = long.MaxValue;
-    });
 
 
-    // Setup CORS
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("Cors", b =>
-        {
-            b.AllowCredentials();
-            b.SetIsOriginAllowed(origin => origin.Contains("localhost"));
-            b.AllowAnyHeader();
-            b.AllowAnyMethod();
-        });
-    });
+    builder.Configuration.AddJsonFile("appsettings.docker.json", true, true);
 
-
-    // Inject Adapters
-    var authenticationServerUrl = Env.Get<string>("AUTHENTICATION_SERVER_URI");
-
-    builder.Services.AddHttpClient<IAuthenticationClient, AuthenticationClient>(client =>
-    {
-        var configuration = builder.Configuration;
-
-        client.BaseAddress =
-            new Uri(authenticationServerUrl ??
-                    $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
-    });
-
-    builder.Services.AddHttpClient<IUsersClient, UsersClient>(client =>
-    {
-        var configuration = builder.Configuration;
-        client.BaseAddress =
-            new Uri(authenticationServerUrl ??
-                    $"{configuration["AuthenticationServer:Scheme"]}://{configuration["AuthenticationServer:Host"]}:{configuration["AuthenticationServer:Port"]}");
-    });
-
-    // Inject Services
-    builder.Services.Scan(scan => scan
-        .FromApplicationDependencies()
-        .AddClasses(classes => classes.InNamespaces(
-            "Core.Services",
-            "Db.Repositories",
-            "Db.Repositories.Internal"
-        ))
-        .AsImplementedInterfaces()
-        .WithSingletonLifetime());
-
-    // Setup Logging
-    builder.Host.UseSerilog((_, lc) => lc
-        .Enrich.With(new CallerEnricher())
-        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
-        .WriteTo.Console(
-            LogEventLevel.Debug,
-            "[{Timestamp:HH:mm:ss} {Level}{Caller}] {Message:lj}{NewLine}{Exception}",
-            theme: AnsiConsoleTheme.Code
-        )
+    builder.WebHost.ConfigureKestrel((_, options) => {
+            options.Listen(IPAddress.Any, 4003, _ => { });
+            options.Limits.MaxRequestBodySize = long.MaxValue;
+        }
     );
 
+    // Setup Logging
+    builder.Logging.ClearProviders();
+    builder.Logging.AddSimpleConsole(o => {
+            o.ColorBehavior = LoggerColorBehavior.Enabled;
+            o.SingleLine = true;
+        }
+    );
+
+    // Setup CORS
+    builder.Services.AddCors(options => {
+            options.AddPolicy("Cors", b => {
+                    b.AllowCredentials();
+                    b.SetIsOriginAllowed(origin => origin.Contains("localhost"));
+                    b.AllowAnyHeader();
+                    b.AllowAnyMethod();
+                }
+            );
+        }
+    );
+
+
+    // Inject Subprojects
+    builder.Services.AddModule<AdapterModule>(builder.Configuration);
+    builder.Services.AddModule<CoreModule>(builder.Configuration);
+    builder.Services.AddModule<DatabaseModule>(builder.Configuration);
+
     // Convert Enum to String 
-    builder.Services
-        .AddControllers(o =>
-        {
-            o.Conventions.Add(new ControllerDocumentationConvention());
-            o.OutputFormatters.RemoveType<StringOutputFormatter>();
-        })
-        .AddNewtonsoftJson(x => x.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter()));
+    builder.Services.AddControllers(o => {
+                o.Conventions.Add(new ControllerDocumentationConvention());
+                o.OutputFormatters.RemoveType<StringOutputFormatter>();
+            }
+        )
+        .AddNewtonsoftJson(x => x.SerializerSettings.Converters.Add(new StringEnumConverter()));
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
-        // c.CustomSchemaIds(type => type.ToString());
-        c.OperationFilter<RequireAuthAttribute.Swagger>();
-    });
+    builder.Services.AddSwaggerGen(c => {
+            if (builder.Environment.IsProduction())
+            {
+                c.AddServer(new OpenApiServer {Url = appPath});
+            }
+
+            c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
+            // c.CustomSchemaIds(type => type.ToString());
+            c.OperationFilter<RequireAuthAttribute.Swagger>();
+        }
+    );
 
 
     // Setup SPA Serving
     if (builder.Environment.IsProduction())
+    {
         Console.WriteLine($"Server in production, serving SPA from {frontPath} folder");
+    }
 
     // builder.Services.AddSpaStaticFiles(configuration => { configuration.RootPath = frontPath; });
 
 
     return builder;
-};
+}
 
-var builder = useBuilder();
+var builder = UseBuilder();
 
 
 var app = builder.Build();
 
-var useApp = (WebApplication application) =>
+void UseApp(WebApplication application)
 {
     application.UseSwagger();
     application.UseSwaggerUI();
@@ -133,16 +116,13 @@ var useApp = (WebApplication application) =>
         //    spa.Options.SourcePath = frontPath;
 
         //});
-        application.UseDefaultFiles(new DefaultFilesOptions
-        {
-            DefaultFileNames = new List<string> { "index.html" }
-        });
+        application.UseDefaultFiles(new DefaultFilesOptions {DefaultFileNames = new List<string> {"index.html"}});
         application.UseStaticFiles();
     }
 
 
     // Start the application
     application.Run();
-};
+}
 
-useApp(app);
+UseApp(app);

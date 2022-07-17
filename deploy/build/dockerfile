@@ -3,16 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS builder-back
 WORKDIR /app
 
 COPY back/FileServe.sln ./FileServe.sln
-COPY back/Core/Core.csproj ./Core/Core.csproj
-COPY back/Db/Db.csproj ./Db/Db.csproj
-COPY back/Adapters/Adapters.csproj ./Adapters/Adapters.csproj
-COPY back/Web/Web.csproj ./Web/Web.csproj
+COPY back/Core/FileServe.Api.Core.csproj ./Core/FileServe.Api.Core.csproj
+COPY back/Abstractions/FileServe.Api.Abstractions.csproj ./Abstractions/FileServe.Api.Abstractions.csproj
+COPY back/Db/FileServe.Api.Db.csproj ./Db/FileServe.Api.Db.csproj
+COPY back/Adapters/FileServe.Api.Adapters.csproj ./Adapters/FileServe.Api.Adapters.csproj
+COPY back/Web/FileServe.Api.Web.csproj ./Web/FileServe.Api.Web.csproj
 
 RUN dotnet restore
 
 
 COPY back .
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out  
 
 
 # Building front
@@ -29,13 +30,17 @@ RUN cd /front && npm run build
 
 
 # Running
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /back
 COPY --from=builder-back /app/out .
 
 COPY --from=builder-front /front/build /back/wwwroot
 ENV FRONT_PATH /back/wwwroot
 
+RUN groupadd --gid 1000 -r netcoreserv && useradd -u 1000 --no-log-init -r -g netcoreserv netcoreserv
+RUN chown -R netcoreserv /back
+USER netcoreserv
+
 EXPOSE 4003
-ENTRYPOINT ["dotnet", "Web.dll"]
+ENTRYPOINT ["dotnet", "FileServe.Api.Web.dll"]
 
