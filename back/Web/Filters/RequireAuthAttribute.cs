@@ -10,7 +10,7 @@ namespace FileServe.Api.Web.Filters;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequireAuthAttribute : ActionFilterAttribute
 {
-    private const string AuthenticationTokenField = "authentication-token";
+    public const string AuthenticationTokenField = "authentication-token";
 
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -23,8 +23,8 @@ public class RequireAuthAttribute : ActionFilterAttribute
             throw new Exception("Dependency injection error, Authentication Service is not available");
         }
 
-        var cookie = context.HttpContext.Request.Cookies[AuthenticationTokenField];
-        var header = context.HttpContext.Request.Headers[AuthenticationTokenField].FirstOrDefault();
+        var cookie = context.HttpContext.Request.GetToken(ParameterLocation.Cookie);
+        var header = context.HttpContext.Request.GetToken(ParameterLocation.Header);
 
         var token = cookie ?? header;
 
@@ -37,7 +37,7 @@ public class RequireAuthAttribute : ActionFilterAttribute
 
         if (!await authenticationService.IsLogged(token))
         {
-            context.Result = new ForbidResult("https://elyspio.fr");
+            context.Result = new ForbidResult();
             return;
         }
 
@@ -101,5 +101,18 @@ public class RequireAuthAttribute : ActionFilterAttribute
             operation.Responses.Add("401", new OpenApiResponse {Description = "Unauthorized"});
             operation.Responses.Add("403", new OpenApiResponse {Description = "Forbidden"});
         }
+    }
+}
+
+internal static class RequestExtension
+{
+    public static string? GetToken(this HttpRequest request, ParameterLocation source)
+    {
+        return source switch
+        {
+            ParameterLocation.Cookie => request.Cookies[RequireAuthAttribute.AuthenticationTokenField],
+            ParameterLocation.Header => request.Headers[RequireAuthAttribute.AuthenticationTokenField].FirstOrDefault(),
+            _ => null
+        };
     }
 }

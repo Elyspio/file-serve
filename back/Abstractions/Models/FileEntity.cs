@@ -21,4 +21,6 @@ public class FileEntity
 
     [BsonRepresentation(BsonType.ObjectId)]
     public ObjectId IdGridFs { get; set; }
+
+    public bool Hidden { get; set; }
 }

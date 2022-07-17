@@ -2,7 +2,6 @@ import { Breadcrumbs, Link } from "@mui/material";
 import React, { ReactNode } from "react";
 import { FilesExplorerService, NodeElem } from "../../../../core/services/files.explorer.service";
 import { useInjection } from "inversify-react";
-import { DiKeysService } from "../../../../core/di/di.keys.service";
 
 interface FileBreadcrumbProps {
 	root: NodeElem;
@@ -12,7 +11,7 @@ interface FileBreadcrumbProps {
 
 export function FilesBreadcrumb({ setCurrent, current, root }: FileBreadcrumbProps) {
 	const services = {
-		explorer: useInjection<FilesExplorerService>(DiKeysService.filesExplorer),
+		explorer: useInjection(FilesExplorerService),
 	};
 
 	const parents = React.useMemo(() => services.explorer.getNodeParents(root, current.id), [root, current.id, services.explorer]);

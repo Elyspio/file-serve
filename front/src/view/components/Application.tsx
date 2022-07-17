@@ -3,7 +3,7 @@ import "./Application.scss";
 import Brightness5Icon from "@mui/icons-material/Brightness5";
 import Brightness3Icon from "@mui/icons-material/Brightness3";
 import { Files } from "./files/Files";
-import { useAppSelector } from "../../store";
+import { useAppDispatch, useAppSelector } from "../../store";
 import { toggleTheme } from "../../store/module/theme/theme.action";
 import { createDrawerAction, withDrawer } from "./utils/drawer/Drawer.hoc";
 import { Box } from "@mui/material";
@@ -11,17 +11,17 @@ import Login from "@mui/icons-material/AccountCircle";
 import { ReactComponent as Logout } from "../icons/logout.svg";
 import { login, logout, silentLogin } from "../../store/module/authentication/authentication.action";
 import { updateToastTheme } from "./utils/toast";
-import { Route, Switch as SwitchRouter } from "react-router";
-import { Routes, routes } from "../../config/routes";
+import { Route, Routes } from "react-router";
+import { Routes as IRoutes, routes } from "../../config/routes";
 import { AddFile } from "./files/add/AddFile";
 import { Home } from "@mui/icons-material";
-import { push } from "connected-react-router";
-import { useDispatch } from "react-redux";
+import { push } from "redux-first-history";
 import { getFiles } from "../../store/module/files/files.action";
 import { AuthenticationEvents } from "../../core/services/authentication.service";
+import { useAsyncEffect } from "../hooks/useAsyncEffect";
 
 function Application() {
-	const dispatch = useDispatch();
+	const dispatch = useAppDispatch();
 
 	const { theme, themeIcon, logged } = useAppSelector((s) => ({
 		theme: s.theme.current,
@@ -57,8 +57,8 @@ function Application() {
 	}
 
 	const { home } = useAppSelector((s) => {
-		const path = s.router.location.pathname;
-		const obj: { [key in Routes]?: boolean } = {};
+		const path = s.router.location?.pathname;
+		const obj: { [key in IRoutes]?: boolean } = {};
 		Object.keys(routes).forEach((key) => {
 			obj[key] = path === routes[key];
 			return obj;
@@ -81,23 +81,26 @@ function Application() {
 
 	React.useEffect(() => {
 		AuthenticationEvents.on("login", () => {
-			dispatch(getFiles("user"));
+			dispatch(getFiles({ owner: "user" }));
+			dispatch(getFiles({ owner: "public" }));
 		});
 	}, [dispatch]);
 
-	React.useEffect(() => {
-		dispatch(silentLogin());
-		dispatch(getFiles("public"));
+	useAsyncEffect(async () => {
+		const { payload } = await dispatch(silentLogin());
+		if (!payload) {
+			dispatch(getFiles({ owner: "public" }));
+		}
 	}, [dispatch]);
 
 	// endregion
 
 	const drawer = withDrawer({
 		component: (
-			<SwitchRouter>
-				<Route exact path={routes.home} component={Files} />
-				<Route exact path={routes.addFile} component={AddFile} />
-			</SwitchRouter>
+			<Routes>
+				<Route path={routes.home} element={<Files />} />
+				<Route path={routes.addFile} element={<AddFile />} />
+			</Routes>
 		),
 		actions,
 		title: "Files",

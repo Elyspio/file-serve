@@ -1,3 +1,15 @@
-﻿namespace FileServe.Api.Abstractions.Transports;
+﻿using System.ComponentModel.DataAnnotations;
 
-public record FileData(string Id, string Filename, string Username, string Mime, string IdGridFs, long Size, string Location) { }
+namespace FileServe.Api.Abstractions.Transports;
+
+public class FileData
+{
+    [Required] public Guid Id { get; set; }
+    [Required] public string Username { get; set; }
+    [Required] public string Filename { get; set; }
+    [Required] public string Mime { get; set; }
+    [Required] public string Location { get; set; }
+    [Required] public long Size { get; set; }
+    [Required] public string IdGridFs { get; set; }
+    [Required] public bool Hidden { get; set; }
+}

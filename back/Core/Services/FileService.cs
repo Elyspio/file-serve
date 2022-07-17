@@ -10,7 +10,7 @@ internal class FileService : IFileService
 {
     private const string PublicUser = "public";
 
-    private FileAssembler fileAssembler = new();
+    private readonly FileAssembler fileAssembler = new();
 
 
     private readonly IFilesRepository repository;
@@ -20,78 +20,63 @@ internal class FileService : IFileService
         this.repository = repository;
     }
 
-    public async Task<List<FileData>> GetPublicFiles()
+    public async Task<(byte[] content, string contentType, string filename)> GetContent(Guid id, string? username = null)
     {
-        return await GetUserFiles(PublicUser);
-    }
-
-    public async Task<FileData> AddPublicFile(string filename, string mime, Stream content, string location)
-    {
-        return await AddUserFile(PublicUser, filename, mime, content, location);
-    }
-
-    public async Task<(byte[], string)> GetPublicFileContent(string id)
-    {
-        return await GetUserFileContent(PublicUser, id);
-    }
-
-    public async Task<string> GetPublicFileContentAsString(string id)
-    {
-        return await GetUserFileContentAsString(PublicUser, id);
-    }
-
-
-    public async Task<Stream> GetPublicFileContentAsStream(string id)
-    {
-        return await GetUserFileContentAsStream(PublicUser, id);
-    }
-
-
-    public async Task<FileData> GetPublicFile(string id)
-    {
-        return await GetUserFile(PublicUser, id);
-    }
-
-    public async Task DeletePublicFile(string id)
-    {
-        await DeleteUserFile(PublicUser, id);
-    }
-
-    public async Task<List<FileData>> GetUserFiles(string username)
-    {
-        return fileAssembler.Convert(await repository.GetFiles(username));
-    }
-
-    public async Task<FileData> AddUserFile(string username, string filename, string mime, Stream content, string location)
-    {
-        return fileAssembler.Convert(await repository.AddFile(username, filename, mime, content, location));
-    }
-
-    public async Task<(byte[], string)> GetUserFileContent(string username, string id)
-    {
-        var file = await GetUserFile(username, id);
+        username ??= PublicUser;
+        var file = await Get(id, username);
         var content = await repository.GetFileContent(username, id);
-        return (content, file.Mime);
+        return (content, file.Mime, file.Filename);
     }
 
-    public async Task<string> GetUserFileContentAsString(string username, string id)
+    public async Task<string> GetContentAsString(Guid id, string? username = null)
     {
+        username ??= PublicUser;
         var content = await repository.GetFileContent(username, id);
         return Encoding.Default.GetString(content);
     }
 
-    public async Task<FileData> GetUserFile(string username, string id)
+
+    public async Task<Stream> GetContentAsStream(Guid id, string? username = null)
     {
-        return fileAssembler.Convert(await repository.GetFile(username, id));
+        username ??= PublicUser;
+        return await repository.GetFileContentAsStream(username, id);
     }
 
-    public async Task DeleteUserFile(string username, string id)
+    public async Task<FileData> Get(Guid id, string? username = null)
     {
+        username ??= PublicUser;
+        var file = await repository.GetFile(username, id);
+        return fileAssembler.Convert(file);
+    }
+
+    public async Task<List<FileData>> GetAll(bool retrieveHidden, string? username = null)
+    {
+        username ??= PublicUser;
+        var files = await repository.GetFiles(username);
+
+        if (!retrieveHidden)
+        {
+            files = files.FindAll(f => f.Hidden == false);
+        }
+
+        return fileAssembler.Convert(files);
+    }
+
+    public async Task Delete(Guid id, string? username = null)
+    {
+        username ??= PublicUser;
         await repository.DeleteFile(username, id);
     }
 
-    public async Task<Stream> GetUserFileContentAsStream(string username, string id)
+    public async Task ToggleVisibility(Guid id, string? username = null)
     {
-        return await repository.GetFileContentAsStream(username, id);
+        username ??= PublicUser;
+        await repository.ToggleVisibility(username, id);
+    }
+
+    public async Task<FileData> Add(string filename, string mime, Stream content, string location, bool hidden, string? username = null)
+    {
+        username ??= PublicUser;
+        return fileAssembler.Convert(await repository.AddFile(username, filename, mime, content, location, hidden));
     }
 }

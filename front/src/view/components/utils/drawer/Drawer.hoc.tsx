@@ -4,7 +4,7 @@ import { Box, Grid, Paper, Typography } from "@mui/material";
 import { Drawer } from "./Drawer";
 import "./actions/Actions.scss";
 import store from "../../../../store";
-import { push } from "connected-react-router";
+import { push } from "redux-first-history";
 import { routes } from "../../../../config/routes";
 
 export type WithDrawerProps = {

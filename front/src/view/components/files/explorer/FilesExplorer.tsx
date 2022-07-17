@@ -1,24 +1,25 @@
 import React from "react";
-import { FileModel } from "../../../../core/apis/backend/generated";
+import { FileData } from "../../../../core/apis/backend/generated";
 import { useInjection } from "inversify-react";
 import { FilesExplorerService, NodeElem, NodeFolder } from "../../../../core/services/files.explorer.service";
-import { DiKeysService } from "../../../../core/di/di.keys.service";
 import { Grid, IconButton } from "@mui/material";
 import { Add, ArrowBack } from "@mui/icons-material";
-import { NodeExplorer } from "./NodeExplorer";
+import { NodeExplorer } from "./node/NodeExplorer";
 import { FilesBreadcrumb } from "./FilesBreadcrumb";
 import { useAppDispatch, useAppSelector } from "../../../../store";
 import { routes } from "../../../../config/routes";
-import { push } from "connected-react-router";
+import { push } from "redux-first-history";
+import { FileOwner } from "../../../../store/module/files/files.reducer";
+import { EmptyFileList } from "./EmptyFileList";
 
 interface FileExplorerProps {
-	files: FileModel[];
-	owner: "public" | "user";
+	files: FileData[];
+	owner: FileOwner;
 }
 
 export function FilesExplorer({ files, owner }: FileExplorerProps) {
 	const services = {
-		explorer: useInjection<FilesExplorerService>(DiKeysService.filesExplorer),
+		explorer: useInjection(FilesExplorerService),
 	};
 
 	const dispatch = useAppDispatch();
@@ -41,9 +42,9 @@ export function FilesExplorer({ files, owner }: FileExplorerProps) {
 	const nodes = React.useMemo(() => {
 		const nodes = [...(current as NodeFolder).nodes];
 		nodes.sort((a, b) => {
-			if (a.owner === b.owner) return a.path.localeCompare(b.path);
-			if (a.owner === "folder" && b.owner === "file") return -1;
-			if (a.owner === "file" && b.owner === "folder") return 1;
+			if (a.type === b.type) return a.path.localeCompare(b.path);
+			if (a.type === "folder" && b.type === "file") return -1;
+			if (a.type === "file" && b.type === "folder") return 1;
 			return a.id < b.id ? -1 : 1;
 		});
 		return nodes;
@@ -75,14 +76,20 @@ export function FilesExplorer({ files, owner }: FileExplorerProps) {
 
 	const addFile = React.useCallback(() => {
 		handleClose();
-		dispatch(push({ pathname: routes.addFile, state: { user: owner === "user", location: current.path } }));
+		dispatch(push(routes.addFile, { user: owner === "user", location: current.path }));
 	}, [handleClose, dispatch, current.path, owner]);
 
-	const visualisationModes = useAppSelector((s) => s.files.visualisation);
+	const { visualisationModes, logged } = useAppSelector((s) => ({
+		visualisationModes: s.files.visualisation,
+		logged: s.authentication.logged,
+	}));
 
 	const visualisationMode = React.useMemo(() => visualisationModes[owner], [visualisationModes, owner]);
 
-	if (files.length === 0) return null;
+	if (files.length === 0) {
+		if (!logged) return null;
+		return <EmptyFileList owner={owner} />;
+	}
 
 	let inline = visualisationMode === "list";
 

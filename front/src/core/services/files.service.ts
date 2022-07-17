@@ -1,8 +1,6 @@
 import { inject, injectable } from "inversify";
-import { DiKeysApi } from "../di/di.keys.api";
 import { BackendApi } from "../apis/backend";
-import { FileModel } from "../apis/backend/generated";
-import { ToastOn } from "../utils/decorators";
+import { FileData } from "../apis/backend/generated";
 
 function download({ content, name }: { name: string; content: Blob }) {
 	const link = window.document.createElement("a");
@@ -24,6 +22,7 @@ export class FilesService {
 		list: this.listPublic.bind(this),
 		get: this.getPublic.bind(this),
 		getLink: this.getLinkPublic.bind(this),
+		toggleVisibility: this.toggleVisibilityPublic.bind(this),
 	};
 	public user = {
 		add: this.addUser.bind(this),
@@ -34,93 +33,86 @@ export class FilesService {
 		list: this.listUser.bind(this),
 		get: this.getUser.bind(this),
 		getLink: this.getLinkUser.bind(this),
+		toggleVisibility: this.toggleVisibilityUser.bind(this),
 	};
-	@inject(DiKeysApi.backend)
+	@inject(BackendApi)
 	private backendApi!: BackendApi;
 
-	@ToastOn({ success: "Link copied to your clipboard", error: "Could not get the file's url" })
 	private async getLinkPublic(id: string) {
 		const url = `${window.config.endpoints.core}/api/files/public/${id}/binary`;
 		await navigator.clipboard.writeText(url);
 	}
 
-	@ToastOn({ success: "Link copied to your clipboard", error: "Could not get the file's url" })
 	private async getLinkUser(id: string) {
 		const url = `${window.config.endpoints.core}/api/files/user/${id}/binary`;
 		await navigator.clipboard.writeText(url);
 	}
 
-	@ToastOn({ error: "Could not add the public file" }, { concatArgs: ["filename"] })
-	private async addPublic(filename: string, location: string, file: File) {
-		return this.backendApi.clients.files.public.addFile(filename, location, file);
+	private async addPublic(filename: string, location: string, file: File, hidden: boolean) {
+		return this.backendApi.clients.files.public.addFile(filename, location, file, hidden).then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not delete the public file" }, { concatArgs: true })
-	private async deletePublic(id: FileModel["id"]) {
+	private async deletePublic(id: FileData["id"]) {
 		return this.backendApi.clients.files.public.deleteFile(id);
 	}
 
-	@ToastOn({ error: "Could not list public files" })
 	private async listPublic() {
-		return this.backendApi.clients.files.public.getFiles();
+		return this.backendApi.clients.files.public.getFiles().then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not download the public file" }, { concatArgs: true })
-	private async downloadPublic(id: FileModel["id"]) {
-		const { data: file } = await this.public.get(id);
+	private async downloadPublic(id: FileData["id"]) {
+		const file = await this.public.get(id);
 		const { data } = await this.public.getContent(id);
 		await download({ name: file.filename, content: data });
 	}
 
-	@ToastOn({ error: "Could not retrieve the public file" }, { concatArgs: true })
-	private async getPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.getFile(id);
+	private async getPublic(id: FileData["id"]) {
+		return this.backendApi.clients.files.public.getFile(id).then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not retrieve the public file content" }, { concatArgs: true })
-	private async getContentPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.getFileContent(id);
+	private async getContentPublic(id: FileData["id"]) {
+		return this.backendApi.clients.files.public.getFileContent(id).then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not retrieve the public file content as string" }, { concatArgs: true })
-	private async getContentAsStringPublic(id: FileModel["id"]) {
-		return this.backendApi.clients.files.public.getFileContentAsString(id);
+	private async getContentAsStringPublic(id: FileData["id"]) {
+		return this.backendApi.clients.files.public.getFileContentAsString(id).then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not add your file" }, { concatArgs: ["filename"] })
-	private async addUser(filename: string, location: string, file: File) {
-		return this.backendApi.clients.files.user.addFile(filename, location, file);
+	private async toggleVisibilityPublic(id: FileData["id"]) {
+		await this.backendApi.clients.files.public.toggleVisibility(id);
 	}
 
-	@ToastOn({ error: "Could not delete your file" }, { concatArgs: true })
-	private async deleteUser(id: FileModel["id"]) {
+	private async addUser(filename: string, location: string, file: File, hidden: boolean) {
+		return this.backendApi.clients.files.user.addFile(filename, location, file, hidden).then((x) => x.data);
+	}
+
+	private async deleteUser(id: FileData["id"]) {
 		return this.backendApi.clients.files.user.deleteFile(id);
 	}
 
-	@ToastOn({ error: "Could not list your files" }, { concatArgs: true })
 	private async listUser() {
-		return this.backendApi.clients.files.user.getFiles();
+		return this.backendApi.clients.files.user.getFiles().then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not download your file" }, { concatArgs: true })
-	private async downloadUser(id: FileModel["id"]) {
-		const { data: file } = await this.user.get(id);
+	private async downloadUser(id: FileData["id"]) {
+		const file = await this.user.get(id);
 		const { data } = await this.user.getContent(id);
 		await download({ name: file.filename, content: data });
 	}
 
-	@ToastOn({ error: "Could not retrieve your file" }, { concatArgs: true })
-	private async getUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.getFile(id);
+	private async getUser(id: FileData["id"]) {
+		return this.backendApi.clients.files.user.getFile(id).then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not retrieve your file content" }, { concatArgs: true })
-	private async getContentUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.getFileContent(id);
+	private async getContentUser(id: FileData["id"]) {
+		return this.backendApi.clients.files.user.getFileContent(id).then((x) => x.data);
 	}
 
-	@ToastOn({ error: "Could not retrieve the public file content as string" }, { concatArgs: true })
-	private async getContentAsStringUser(id: FileModel["id"]) {
-		return this.backendApi.clients.files.user.getFileContentAsString(id);
+	private async getContentAsStringUser(id: FileData["id"]) {
+		return this.backendApi.clients.files.user.getFileContentAsString(id).then((x) => x.data);
+	}
+
+	private async toggleVisibilityUser(id: FileData["id"]) {
+		await this.backendApi.clients.files.user.toggleVisibility(id);
 	}
 }

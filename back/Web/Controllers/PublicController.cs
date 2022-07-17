@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using FileServe.Api.Abstractions.Interfaces.Services;
-using FileServe.Api.Web.Assemblers;
+using FileServe.Api.Abstractions.Transports;
 using FileServe.Api.Web.Filters;
-using FileServe.Api.Web.Models;
+using FileServe.Api.Web.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
 
 namespace FileServe.Api.Web.Controllers;
 
@@ -11,59 +12,63 @@ namespace FileServe.Api.Web.Controllers;
 [Route("api/files/public", Name = "PublicFiles")]
 public class PublicController : ControllerBase
 {
-    private readonly FileAssembler assembler;
-
-
+    private readonly IAuthenticationService authenticationService;
     private readonly IFileService fileService;
-    private readonly Dictionary<string, Stream> streams = new();
+    private readonly Dictionary<Guid, Stream> streams = new();
 
-    public PublicController(IFileService fileService)
+    public PublicController(IFileService fileService, IAuthenticationService authenticationService)
     {
         this.fileService = fileService;
-        assembler = new FileAssembler();
+        this.authenticationService = authenticationService;
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<FileModel>), 200)]
+    [ProducesResponseType(typeof(List<FileData>), 200)]
     public async Task<IActionResult> GetFiles()
     {
-        var files = await fileService.GetPublicFiles();
-        return Ok(assembler.Convert(files));
+        var token = Request.GetToken(ParameterLocation.Cookie);
+
+        var retrieveHidden = token != default && await authenticationService.IsLogged(token);
+
+        var files = await fileService.GetAll(retrieveHidden);
+        return Ok(files);
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(FileModel), 201)]
+    [ProducesResponseType(typeof(FileData), 201)]
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
-    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required] [FromForm] string location, [Required] IFormFile file)
+    public async Task<IActionResult> AddFile([Required] [FromForm] string filename, [Required] [FromForm] string location, [Required] IFormFile file, [FromForm] [Required] bool hidden)
     {
         var stream = file.OpenReadStream();
-        var data = await fileService.AddPublicFile(filename, file.ContentType, stream, location);
-        var model = assembler.Convert(data);
+        var data = await fileService.Add(filename, file.ContentType, stream, location, hidden);
         await stream.DisposeAsync();
-        return Created($"/files/public/{model.Id}", model);
+        return Created($"/files/public/{data.Id}", data);
     }
 
-    [HttpGet("{id}/binary")]
+    [HttpGet("{id:guid}/binary")]
     [Produces("application/octet-stream", Type = typeof(FileResult))]
-    public async Task<IActionResult> GetFileContent([Required] string id)
+    public async Task<IActionResult> GetFileContent([Required] Guid id)
     {
-        var (content, mime) = await fileService.GetPublicFileContent(id);
-        return new FileContentResult(content, mime);
+        var (content, mime, filename) = await fileService.GetContent(id);
+        return new FileContentResult(content, mime)
+        {
+            FileDownloadName = filename
+        };
     }
 
-    [HttpGet("{id}/string")]
+    [HttpGet("{id:guid}/string")]
     [Produces("text/plain", Type = typeof(string))]
-    public async Task<IActionResult> GetFileContentAsString([Required] string id)
+    public async Task<IActionResult> GetFileContentAsString([Required] Guid id)
     {
-        var content = await fileService.GetPublicFileContentAsString(id);
+        var content = await fileService.GetContentAsString(id);
         return Ok(content);
     }
 
 
-    [HttpGet("{id}/stream")]
+    [HttpGet("{id:guid}/stream")]
     [ProducesResponseType(typeof(byte[]), 200, "application/octet-stream")]
     [ProducesResponseType(typeof(byte[]), 206, "application/octet-stream")]
-    public async Task<IActionResult> GetFileContentAsStream([Required] string id)
+    public async Task<IActionResult> GetFileContentAsStream([Required] Guid id)
     {
         Stream stream;
         if (streams.ContainsKey(id))
@@ -72,7 +77,7 @@ public class PublicController : ControllerBase
         }
         else
         {
-            stream = await fileService.GetPublicFileContentAsStream(id);
+            stream = await fileService.GetContentAsStream(id);
             streams.Add(id, stream);
         }
 
@@ -80,21 +85,32 @@ public class PublicController : ControllerBase
     }
 
 
-    [HttpGet("{id}")]
-    [ProducesResponseType(typeof(FileModel), 200)]
-    public async Task<IActionResult> GetFile([Required] string id)
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(FileData), 200)]
+    public async Task<IActionResult> GetFile([Required] Guid id)
     {
-        var file = await fileService.GetPublicFile(id);
-        return Ok(assembler.Convert(file));
+        var file = await fileService.Get(id);
+        return Ok(file);
     }
 
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(typeof(void), 204)]
     [RequireAuth]
-    public async Task<ActionResult> DeleteFile([Required] string id)
+    public async Task<ActionResult> DeleteFile([Required] Guid id)
     {
-        await fileService.DeletePublicFile(id);
+        await fileService.Delete(id);
         return NoContent();
     }
+
+
+    [HttpPut("{id:guid}/visibility")]
+    [ProducesResponseType(typeof(void), 204)]
+    [RequireAuth]
+    public async Task<IActionResult> ToggleVisibility([Required] Guid id)
+    {
+        await fileService.ToggleVisibility(id);
+        return NoContent();
+    }
+
 }

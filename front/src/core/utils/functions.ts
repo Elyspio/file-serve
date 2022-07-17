@@ -1,5 +1,3 @@
-import { inspect } from "util";
-
 export function getFunctionArgs(func: Function) {
 	return (func + "")
 		.replace(/[/][/].*$/gm, "") // strip single-line comments
@@ -15,6 +13,6 @@ export function getFunctionArgs(func: Function) {
 export function getArgsStr(originalMethod: any, args: any[]) {
 	const argsName = getFunctionArgs(originalMethod);
 	return argsName.reduce((previousValue, currentValue, currentIndex) => {
-		return `${previousValue} ${currentValue}=${inspect(args[currentIndex])}`;
+		return `${previousValue} ${currentValue}=${JSON.stringify(args[currentIndex])}`;
 	}, "");
 }

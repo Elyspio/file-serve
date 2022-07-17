@@ -1,10 +1,9 @@
-﻿using FileServe.Api.Abstractions.Interfaces.Repositories;
+﻿using FileServe.Api.Abstractions.Common.Extensions;
+using FileServe.Api.Abstractions.Interfaces.Repositories;
 using FileServe.Api.Abstractions.Models;
-using FileServe.Api.Abstractions.Transports;
 using FileServe.Api.Db.Repositories.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 
@@ -32,7 +31,7 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
         return files;
     }
 
-    public async Task<FileEntity> AddFile(string username, string filename, string mime, Stream content, string location)
+    public async Task<FileEntity> AddFile(string username, string filename, string mime, Stream content, string location, bool hidden)
     {
         var file = new FileEntity
         {
@@ -40,7 +39,8 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
             Mime = mime,
             Username = username,
             Location = location,
-            Size = content.Length
+            Size = content.Length,
+            Hidden = hidden
         };
         await EntityCollection.InsertOneAsync(file);
 
@@ -53,14 +53,14 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
         return file;
     }
 
-    public async Task<byte[]> GetFileContent(string username, string id)
+    public async Task<byte[]> GetFileContent(string username, Guid id)
     {
         var file = await GetFile(username, id);
 
         return await gridFsBucket.DownloadAsBytesByNameAsync(file.Id.ToString());
     }
 
-    public async Task<Stream> GetFileContentAsStream(string username, string id)
+    public async Task<Stream> GetFileContentAsStream(string username, Guid id)
     {
         var file = await GetFile(username, id);
 
@@ -72,23 +72,32 @@ internal class FilesRepository : BaseRepository<FileEntity>, IFilesRepository
     }
 
 
-    public async Task<FileEntity> GetFile(string username, string id)
+    public async Task<FileEntity> GetFile(string username, Guid id)
     {
-        var files = await EntityCollection.Find(f => f.Id == new ObjectId(id) && f.Username == username).ToListAsync();
+        var files = await EntityCollection.Find(f => f.Id == id.AsObjectId() && f.Username == username).ToListAsync();
 
 
         if (!files.Any())
         {
-            throw new FileNotFoundException(username, id);
+            throw new FileNotFoundException(username, id.ToString());
         }
 
         return files.First();
     }
 
-    public async Task DeleteFile(string username, string id)
+    public async Task DeleteFile(string username, Guid id)
     {
         var file = await GetFile(username, id);
         await gridFsBucket.DeleteAsync(file.IdGridFs);
         await EntityCollection.FindOneAndDeleteAsync(f => f.Id == file.Id);
+    }
+
+    public async Task ToggleVisibility(string username, Guid id)
+    {
+        var file = await GetFile(username, id);
+
+        file.Hidden = !file.Hidden;
+
+        await EntityCollection.ReplaceOneAsync(f => f.Id == id.AsObjectId(), file);
     }
 }

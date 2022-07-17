@@ -1,6 +1,6 @@
 export const routes = {
-	home: "/",
-	addFile: "/new",
+	home: "/files",
+	addFile: "/files/new",
 };
 
 export type Routes = keyof typeof routes;

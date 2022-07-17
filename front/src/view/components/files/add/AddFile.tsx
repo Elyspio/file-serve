@@ -1,10 +1,11 @@
 import React from "react";
-import { Autocomplete, Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Divider, FormControl, FormControlLabel, InputLabel, MenuItem, Paper, Select, Stack, Switch, TextField } from "@mui/material";
 import { Title } from "../../utils/title";
 import { useAppDispatch, useAppSelector } from "../../../../store";
 import { login } from "../../../../store/module/authentication/authentication.action";
-import { useHistory } from "react-router-dom";
 import { addFile } from "../../../../store/module/files/files.action";
+import { useLocationState } from "../../../hooks/useLocationState";
+import { useInput } from "../../../hooks/useInput";
 
 const fileTypes = {
 	user: "user",
@@ -12,13 +13,16 @@ const fileTypes = {
 } as const;
 
 export function AddFile() {
-	const {
-		location: { state },
-	} = useHistory<{ user: boolean; location?: string }>();
+	const state = useLocationState<{ user: boolean; location?: string }>();
 
 	const [fileType, setFileType] = React.useState<typeof fileTypes[keyof typeof fileTypes]>(state?.user ? "user" : "public");
-
+	const [file, setFile] = React.useState<File | null>(null);
+	const [filename, setFilename] = React.useState("");
+	const [hidden, setHidden] = React.useState(false);
+	const [location, setLocation] = React.useState(state?.location ?? "/");
 	const logged = useAppSelector((s) => s.authentication.logged);
+
+	const dispatch = useAppDispatch();
 
 	const { user: userFiles, public: publicFiles } = useAppSelector((s) => s.files);
 
@@ -26,17 +30,16 @@ export function AddFile() {
 		return [...new Set((fileType === "user" ? userFiles : publicFiles).map((file) => file.location))];
 	}, [userFiles, publicFiles, fileType]);
 
-	const dispatch = useAppDispatch();
-
-	const [file, setFile] = React.useState<File | null>(null);
-	const [filename, setFilename] = React.useState("");
-	const [location, setLocation] = React.useState(state?.location ?? "/");
+	const setLocationCb = useInput(setLocation);
+	const setFilenameCb = useInput(setFilename);
+	const setFileTypeCb = useInput(setFileType);
+	const setHiddenCb = useInput(setHidden, "checked");
 
 	const create = React.useCallback(async () => {
 		if (file !== null) {
-			dispatch(addFile({ owner: fileType, filename, location, file }));
+			dispatch(addFile({ owner: fileType, filename, location, file, hidden }));
 		}
-	}, [dispatch, fileType, filename, file, location]);
+	}, [dispatch, fileType, filename, file, location, hidden]);
 
 	const handleFile = React.useCallback((e) => {
 		const files = e.target.files;
@@ -47,84 +50,68 @@ export function AddFile() {
 		return setFile(file);
 	}, []);
 
-	if (!logged)
+	if (!logged) {
 		return (
 			<Box display={"flex"} justifyContent={"center"} alignItems={"center"}>
 				<Button onClick={() => dispatch(login())}>Please login before access to this page</Button>
 			</Box>
 		);
+	}
 
 	const emptyFile = file === null;
 	return (
 		<Paper className={"AddFile"}>
 			<Box px={8} py={4} width={"50vw"} maxWidth={600}>
-				<Grid container direction={"column"} alignItems={"center"} spacing={6}>
-					<Grid item container xs={12} alignItems={"center"} direction={"column"}>
-						<Title>Add a file</Title>
-						<Divider className={"Divider"} />
-					</Grid>
+				<Stack spacing={4}>
+					<Title>Add a file</Title>
+					<Divider></Divider>
 
-					<Grid item xs={6} container>
-						<FormControl fullWidth>
-							<InputLabel id="settings-theme-label">Who can access to this file?</InputLabel>
-							<Select
-								size={"small"}
-								labelId="settings-theme-label"
-								id="settings-theme-select"
-								value={fileType}
-								label="Who can access to this file?"
-								fullWidth
-								onChange={(e) => setFileType(e.target.value as any)}
-							>
-								<MenuItem value={fileTypes.public}>Everyone</MenuItem>
-								<MenuItem value={fileTypes.user}>Only me</MenuItem>
-							</Select>
-						</FormControl>
-					</Grid>
-
-					<Grid item xs={6} container>
-						<Button color={"secondary"} variant="outlined" component="label" fullWidth title={emptyFile ? "Select a file" : "Replace selected file"}>
-							Select File
-							<input type="file" onChange={handleFile} hidden />
-						</Button>
-					</Grid>
-
+					<Button color={"inherit"} variant="outlined" component="label" fullWidth title={emptyFile ? "Select a file" : "Replace selected file"}>
+						Select File
+						<input type="file" onChange={handleFile} hidden />
+					</Button>
 					{!emptyFile && (
 						<>
-							<Grid item xs={6} container>
-								<Autocomplete
-									fullWidth
+							<FormControl fullWidth>
+								<TextField size={"small"} id="set-filename" label="Filename" variant="outlined" value={filename} disabled={emptyFile} onChange={setFilenameCb} />
+							</FormControl>
+
+							<Autocomplete
+								fullWidth
+								size={"small"}
+								id="free-solo-demo"
+								freeSolo
+								options={filePaths}
+								value={location}
+								renderInput={(params) => <TextField {...params} label="Location" onChange={setLocationCb} />}
+							/>
+
+							<FormControl fullWidth>
+								<InputLabel id="add-file-access-label">Who can access to this file?</InputLabel>
+								<Select
 									size={"small"}
-									id="free-solo-demo"
-									freeSolo
-									options={filePaths}
-									value={location}
-									renderInput={(params) => <TextField {...params} label="Location" onChange={(e) => setLocation(e.target.value as string)} />}
-								/>
-							</Grid>
+									labelId="add-file-access-label"
+									id="add-file-access-select"
+									value={fileType}
+									label="Who can access to this file?"
+									fullWidth
+									onChange={setFileTypeCb}
+								>
+									<MenuItem value={fileTypes.public}>Everyone</MenuItem>
+									<MenuItem value={fileTypes.user}>Only me</MenuItem>
+								</Select>
+							</FormControl>
 
-							<Grid item xs={6} container>
-								<FormControl fullWidth>
-									<TextField
-										size={"small"}
-										id="outlined-basic"
-										label="Filename"
-										variant="outlined"
-										value={filename}
-										disabled={emptyFile}
-										onChange={(e) => setFilename(e.target.value)}
-									/>
-								</FormControl>
-							</Grid>
+							<Box>
+								<FormControlLabel labelPlacement={"start"} control={<Switch onChange={setHiddenCb} />} label="Hidden" />
+							</Box>
 
-							<Grid item xs={12} container justifyContent={"center"}>
-								<Button size={"large"} color={"primary"} variant={"outlined"} disabled={filename.length === 0 || emptyFile} onClick={create}>
-									Create
-								</Button>
-							</Grid>
+							<Button size={"large"} color={"primary"} variant={"outlined"} disabled={filename.length === 0 || emptyFile} onClick={create}>
+								Create
+							</Button>
 						</>
 					)}
-				</Grid>
+				</Stack>
 			</Box>
 		</Paper>
 	);

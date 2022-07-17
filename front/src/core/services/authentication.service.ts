@@ -2,16 +2,14 @@ import { openPage } from "../utils/web";
 import { EventManager } from "../utils/event";
 import { inject, injectable } from "inversify";
 import { ThemeService } from "./theme.service";
-import { DiKeysService } from "../di/di.keys.service";
 import { AuthenticationApi } from "../apis/authentication";
-import { DiKeysApi } from "../di/di.keys.api";
 
 @injectable()
 export class AuthenticationService {
-	@inject(DiKeysService.theme)
+	@inject(ThemeService)
 	private themeService!: ThemeService;
 
-	@inject(DiKeysApi.authentication)
+	@inject(AuthenticationApi)
 	private authenticationApi!: AuthenticationApi;
 
 	public openLoginPage() {

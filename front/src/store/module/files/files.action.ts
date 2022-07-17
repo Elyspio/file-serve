@@ -1,38 +1,112 @@
 import { createAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { container } from "../../../core/di";
-import { DiKeysService } from "../../../core/di/di.keys.service";
 import { FilesService } from "../../../core/services/files.service";
-import { push } from "connected-react-router";
+import { push } from "redux-first-history";
 import { routes } from "../../../config/routes";
 import { FileOwner, VisualisationMode } from "./files.reducer";
-import { StoreState } from "../../index";
+import { ExtraArgument, StoreState } from "../../index";
+import { toast } from "react-toastify";
+import { FileData } from "../../../core/apis/backend/generated";
 
-const service = container.get<FilesService>(DiKeysService.files);
+const service = container.get(FilesService);
 
-export const getFiles = createAsyncThunk("files/getUserFiles", async (type: FileOwner) => {
-	const { data } = await service[type].list();
-	return { data, owner: type };
+type GetFileParam = { owner: FileOwner; notify?: boolean };
+export const getFiles = createAsyncThunk("files/getUserFiles", async ({ owner, notify = true }: GetFileParam) => {
+	let promise = service[owner].list();
+
+	let data: FileData[];
+
+	if (notify) {
+		data = await toast.promise(promise, {
+			error: `Could not load ${owner} files`,
+			pending: `Loading ${owner} files`,
+			success: `Loaded ${owner} files`,
+		});
+	} else {
+		data = await promise;
+	}
+
+	return { data, owner };
 });
 
-export const addFile = createAsyncThunk("files/addFile", async (params: { owner: FileOwner; filename: string; location: string; file: File }, { dispatch }) => {
-	await service[params.owner].add(params.filename, params.location, params.file);
-	await dispatch(getFiles(params.owner));
+type AddParams = { owner: FileOwner; filename: string; location: string; file: File; hidden: boolean };
+export const addFile = createAsyncThunk("files/addFile", async (params: AddParams, { dispatch }) => {
+	await service[params.owner].add(params.filename, params.location, params.file, params.hidden);
+	await dispatch(getFiles({ owner: params.owner, notify: false }));
 	await dispatch(push(routes.home));
 });
 
-export const deleteFile = createAsyncThunk("files/deleteFile", async (params: { owner: FileOwner; fileId: string }, { dispatch }) => {
-	await service[params.owner].delete(params.fileId);
-	await dispatch(getFiles(params.owner));
-});
-
-export const deleteFolder = createAsyncThunk("files/deleteFile", async (params: { owner: FileOwner; path: string }, { dispatch, getState }) => {
+type FileParam = { owner: FileOwner; fileId: string };
+type DeleteFileParam = FileParam;
+export const deleteFile = createAsyncThunk("files/deleteFile", async ({ fileId, owner }: DeleteFileParam, { dispatch, getState }) => {
 	const { files } = getState() as StoreState;
 
-	const filesInFolder = files[params.owner].filter((file) => file.location.includes(params.path));
+	const file = files[owner].find((f) => f.id === fileId)!;
 
-	await Promise.all(filesInFolder.map((file) => service[params.owner].delete(file.id)));
+	await toast.promise(service[owner].delete(fileId), {
+		error: `Could not delete file "${file.filename}" (${owner})`,
+		pending: `Deleting file "${file.filename}" (${owner})`,
+		success: `File "${file.filename}" (${owner}) deleted`,
+	});
 
-	await dispatch(getFiles(params.owner));
+	await dispatch(getFiles({ owner, notify: false }));
+});
+
+type DeleteFolderParam = { owner: FileOwner; path: string };
+export const deleteFolder = createAsyncThunk("files/deleteFile", async ({ owner, path }: DeleteFolderParam, { dispatch, getState }) => {
+	const { files } = getState() as StoreState;
+
+	const filesInFolder = files[owner].filter((file) => file.location.includes(path));
+
+	await toast.promise(Promise.all(filesInFolder.map((file) => service[owner].delete(file.id))), {
+		error: `Could not delete folder "${path}" (${owner})`,
+		pending: `Deleting folder "${path}" (${owner})`,
+		success: `Folder "${path}" (${owner}) deleted`,
+	});
+
+	await dispatch(getFiles({ owner, notify: false }));
+});
+
+type SetFileVisibilityParam = FileParam;
+export const setFileVisibility = createAsyncThunk("files/setFileVisibility", async ({ fileId, owner }: SetFileVisibilityParam, { extra, getState, dispatch }) => {
+	const {
+		files,
+		authentication: { logged },
+	} = getState() as StoreState;
+
+	const file = files[owner].find((f) => f.id === fileId)!;
+
+	const { container } = extra as ExtraArgument;
+	const service = container.get(FilesService);
+	const promise = service[owner].toggleVisibility(fileId);
+
+	const verb = file.hidden ? "reveal" : "hide";
+
+	const verbIng = file.hidden ? "Revealing" : "Hiding";
+
+	const verbEd = file.hidden ? "revealed" : "hided";
+
+	await toast.promise(promise, {
+		error: `Could not ${verb} file "${file.filename}"`,
+		pending: `${verbIng} file "${file.filename}"`,
+		success: `File "${file.filename}" ${verbEd}`,
+	});
+
+	await dispatch(getFiles({ owner, notify: false }));
+});
+
+type DownloadFileParam = FileParam;
+
+export const downloadFile = createAsyncThunk("files/downloadFile", async ({ fileId, owner }: DownloadFileParam, { extra }) => {
+	const { container } = extra as ExtraArgument;
+	const service = container.get(FilesService);
+	await service[owner].download(fileId);
+});
+
+export const copyFileLink = createAsyncThunk("files/copyFileLink", async ({ fileId, owner }: DownloadFileParam, { extra }) => {
+	const { container } = extra as ExtraArgument;
+	const service = container.get(FilesService);
+	await service[owner].getLink(fileId);
 });
 
 export const setVisualisationMode = createAction<{ owner: FileOwner; mode: VisualisationMode }>("files/changeVisualisationMode");

@@ -1,14 +1,14 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { getFiles, setVisualisationMode } from "./files.action";
-import { FileModel } from "../../../core/apis/backend/generated";
+import { FileData } from "../../../core/apis/backend/generated";
 
 export type FileOwner = "user" | "public";
 
 export type VisualisationMode = "list" | "icons";
 
 export interface ThemeState {
-	public: FileModel[];
-	user: FileModel[];
+	public: FileData[];
+	user: FileData[];
 	visualisation: {
 		user: VisualisationMode;
 		public: VisualisationMode;

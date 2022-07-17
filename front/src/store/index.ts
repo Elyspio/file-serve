@@ -1,28 +1,28 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { themeReducer } from "./module/theme/theme.reducer";
 import { authenticationReducer } from "./module/authentication/authentication.reducer";
-import { connectRouter, routerMiddleware } from "connected-react-router";
 import { createBrowserHistory } from "history";
 import { filesReducer } from "./module/files/files.reducer";
+import { container } from "../core/di";
+import { createReduxHistoryContext } from "redux-first-history";
 
-export const history = createBrowserHistory({
-	basename: "/files",
-});
+const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({ history: createBrowserHistory() });
 
-const createRootReducer = (history) =>
-	combineReducers({
-		router: connectRouter(history),
+const store = configureStore({
+	reducer: {
+		router: routerReducer,
 		theme: themeReducer,
 		authentication: authenticationReducer,
 		files: filesReducer,
-		// rest of your reducers
-	});
-
-const store = configureStore({
-	reducer: createRootReducer(history),
+	},
 	devTools: process.env.NODE_ENV !== "production",
-	middleware: (getDefaultMiddleware) => [routerMiddleware(history), ...getDefaultMiddleware()],
+	middleware: (getDefaultMiddleware) => {
+		const arr = getDefaultMiddleware({ thunk: { extraArgument: { container } } });
+
+		arr.push(routerMiddleware);
+		return arr;
+	},
 });
 export type StoreState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
@@ -30,4 +30,8 @@ export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<StoreState> = useSelector;
 
+export type ExtraArgument = { container: typeof container };
+
 export default store;
+
+export const history = createReduxHistory(store);

@@ -8,7 +8,7 @@ import { container } from "../../../core/di";
 import { DiKeysService } from "../../../core/di/di.keys.service";
 import { LocalStorageService } from "../../../core/services/localStorage.service";
 
-const authentication = container.get<AuthenticationService>(DiKeysService.authentication);
+const authentication = container.get(AuthenticationService);
 const localStorages = {
 	validation: container.get<LocalStorageService>(DiKeysService.localStorage.validation),
 	settings: container.get<LocalStorageService>(DiKeysService.localStorage.settings),
@@ -43,8 +43,8 @@ function waitForLogin(page: Window) {
 }
 
 export const login = createAsyncThunk("authentication/login", async (_, { getState, dispatch }) => {
-	const { logged, username, credentials, settings } = (getState() as StoreState).authentication;
-	if (!logged || username === undefined || credentials === undefined) {
+	const { logged, username, settings } = (getState() as StoreState).authentication;
+	if (!logged || username === undefined) {
 		const toastId = toast.info("Connecting", { autoClose: false });
 		const page = authentication.openLoginPage();
 		if (page != null) {
@@ -57,31 +57,31 @@ export const login = createAsyncThunk("authentication/login", async (_, { getSta
 		}
 	} else {
 		console.info("You are already logged");
-		return { username, credentials, settings };
+		return { username, settings };
 	}
 });
 
 export const silentLogin = createAsyncThunk("authentication/silentLogin", async (_, { getState, dispatch }) => {
-	const { logged, username, credentials, settings } = (getState() as StoreState).authentication;
-	if (!logged || username === undefined || credentials === undefined) {
+	const { logged, username, settings } = (getState() as StoreState).authentication;
+	if (!logged || username === undefined) {
 		if (await authentication.isLogged()) {
-			dispatch(getUserInfos());
+			return await dispatch(getUserInfos());
 		}
 	} else {
 		console.info("You are already logged");
-		return { username, credentials, settings };
+		return { username, settings };
 	}
 });
 
 export const getUserInfos = createAsyncThunk("authentication/getUserInfos", async () => {
 	const username = await authentication.getUsername();
 
-	const [settings, credentials] = await Promise.all([authentication.getSettings(username), authentication.getCredentials(username)]);
+	const settings = await authentication.getSettings(username);
 
 	localStorages.settings.store(undefined, settings);
 
 	AuthenticationEvents.emit("login", username);
-	return { settings, credentials, username };
+	return { settings, username };
 });
 
 export const logout = createAsyncThunk("authentication/logout", async () => {

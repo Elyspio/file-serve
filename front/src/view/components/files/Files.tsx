@@ -1,4 +1,4 @@
-import { Box, Button, Container, Divider, DividerProps, Grid, Paper } from "@mui/material";
+import { Button, Container, Divider, DividerProps, Grid, Paper } from "@mui/material";
 import "./Files.scss";
 import * as React from "react";
 import { useAppDispatch, useAppSelector } from "../../../store";
@@ -24,7 +24,7 @@ export const Files = () => {
 					<Paper sx={{ height: "100%" }}>
 						<Grid direction={"column"} alignItems={"center"} container height={"100%"}>
 							<Grid item>
-								<Title>Public files</Title>
+								<Title>Public</Title>
 							</Grid>
 							<Divide />
 							<Grid item container>
@@ -44,7 +44,7 @@ export const Files = () => {
 							<>
 								<Grid direction={"column"} alignItems={"center"} container height={"100%"}>
 									<Grid item>
-										<Title>Your files</Title>
+										<Title>Your's</Title>
 									</Grid>
 									<Divide />
 									<Grid item container>
@@ -58,9 +58,13 @@ export const Files = () => {
 								</Grid>
 							</>
 						) : (
-							<Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
-								<Button onClick={redirectToLogin}>Login to see your files</Button>
-							</Box>
+							<Grid container alignItems={"center"} justifyContent={"center"} height={"100%"}>
+								<Grid item>
+									<Button variant={"outlined"} onClick={redirectToLogin}>
+										Login to see your files
+									</Button>
+								</Grid>
+							</Grid>
 						)}
 
 						{/*<video width={350} height={360} controls autoPlay muted>*/}

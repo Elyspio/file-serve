@@ -9,21 +9,21 @@ export function updateToastTheme(theme: ThemeState["current"]) {
 		white-space: pre-line;
 	}
 	
-    .Toastify__toast--default {
-        background-color: ${palette.background.default}
-    }
-    .Toastify__toast--info {
-        background-color: ${palette.info[theme]}
-    }
-    .Toastify__toast--success {
-        background-color: ${palette.success[theme]}
-    }
-    .Toastify__toast--warning {
-        background-color: ${palette.warning[theme]}
-    }
-    .Toastify__toast--error {
-        background-color: ${palette.error[theme]}
-    }
+    // .Toastify__toast--default {
+    //     background-color: ${palette.background.default}
+    // }
+    // .Toastify__toast--info {
+    //     background-color: ${palette.info[theme]}
+    // }
+    // .Toastify__toast--success {
+    //     background-color: ${palette.success[theme]}
+    // }
+    // .Toastify__toast--warning {
+    //     background-color: ${palette.warning[theme]}
+    // }
+    // .Toastify__toast--error {
+    //     background-color: ${palette.error[theme]}
+    // }
     `;
 	const id = "style-toastify";
 	let el = window.document.querySelector(`#${id}`);
