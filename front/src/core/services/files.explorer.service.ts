@@ -45,7 +45,7 @@ export class FilesExplorerService {
 
 	public getNodeParents(root: NodeElem, id: NodeElem["id"]) {
 		if (root.type !== "folder") throw new Error("Root must be a NodeFolder");
-		const nodes = this.findNodes(root).filter((node) => node !== false) as NodeElem[];
+		const nodes = this.findNodes(root);
 		let node = nodes.find((node) => node.id === id);
 		if (!node) throw new Error(`Could not find the node ${id} in root with id ${root.id}`);
 		let parents: NodeElem[] = [];
@@ -56,7 +56,7 @@ export class FilesExplorerService {
 		return parents.reverse();
 	}
 
-	private findNodes(root: NodeElem): (NodeElem | false)[] {
+	private findNodes(root: NodeElem): NodeElem[] {
 		if (root.type === "folder") {
 			return [root, ...root.nodes.map((node) => this.findNodes(node)).flat()];
 		} else {

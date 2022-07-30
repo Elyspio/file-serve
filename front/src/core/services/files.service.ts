@@ -62,8 +62,8 @@ export class FilesService {
 
 	private async downloadPublic(id: FileData["id"]) {
 		const file = await this.public.get(id);
-		const { data } = await this.public.getContent(id);
-		await download({ name: file.filename, content: data });
+		const content = await this.public.getContent(id);
+		await download({ name: file.filename, content });
 	}
 
 	private async getPublic(id: FileData["id"]) {
@@ -71,7 +71,7 @@ export class FilesService {
 	}
 
 	private async getContentPublic(id: FileData["id"]) {
-		return this.backendApi.clients.files.public.getFileContent(id).then((x) => x.data);
+		return this.backendApi.clients.files.public.getFileContent(id, { responseType: "blob" }).then((x) => x.data as Blob);
 	}
 
 	private async getContentAsStringPublic(id: FileData["id"]) {
@@ -96,8 +96,8 @@ export class FilesService {
 
 	private async downloadUser(id: FileData["id"]) {
 		const file = await this.user.get(id);
-		const { data } = await this.user.getContent(id);
-		await download({ name: file.filename, content: data });
+		const content = await this.user.getContent(id);
+		await download({ name: file.filename, content });
 	}
 
 	private async getUser(id: FileData["id"]) {
@@ -105,7 +105,7 @@ export class FilesService {
 	}
 
 	private async getContentUser(id: FileData["id"]) {
-		return this.backendApi.clients.files.user.getFileContent(id).then((x) => x.data);
+		return this.backendApi.clients.files.user.getFileContent(id, undefined, undefined, { responseType: "blob" }).then((x) => x.data as Blob);
 	}
 
 	private async getContentAsStringUser(id: FileData["id"]) {
