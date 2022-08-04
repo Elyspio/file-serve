@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+    
+    back:
+        container_name: file-serve-local-back
+        image: elyspio/file-serve:local-back
+        restart: always
+        build:
+            context: ../../..
+            dockerfile: deploy/build/back.local.dockerfile
+        ports:
+            - "4003:4003"
+        environment:
+            AUTHENTICATION_SERVER_URI: "http://host.docker.internal/authentication/"
+            DB_HOST: host.docker.internal
+        volumes:
+            - "./config/back/appsettings.docker.json:/app/Web/appsettings.docker.json"
+            - "../../../back:/app"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+    
+    
+    front:
+        container_name: file-serve-local-front
+        image: elyspio/file-serve:local-front
+        restart: always
+        build:
+            context: ../../..
+            dockerfile: deploy/build/front.local.dockerfile
+        ports:
+            - "3003:3003"
+        volumes:
+            - "../../../front:/app"
+            - /app/node_modules
+        extra_hosts:
+            - "host.docker.internal:host-gateway"

@@ -6,8 +6,8 @@
 */build
 *.map
 
-# Deploy dev
-deploy/dev/data
+# Deploy local
+deploy/environments/local/data
 !deploy/build/
 
 # C# (back)
@@ -16,6 +16,6 @@ back/*/bin
 back/*/obj
 
 # Production configuration
-deploy/prod/.env
-deploy/prod/config/front/conf.js
-/deploy/prod/config/back/appsettings.docker.json
+deploy/environments/prod/.env
+deploy/environments/prod/config/front/conf.js
+/deploy/environments/prod/config/back/appsettings.docker.json
